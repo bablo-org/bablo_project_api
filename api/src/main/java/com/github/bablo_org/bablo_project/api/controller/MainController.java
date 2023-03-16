@@ -1,52 +1,41 @@
 package com.github.bablo_org.bablo_project.api.controller;
 
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import com.google.cloud.firestore.CollectionReference;
+import com.google.cloud.firestore.Firestore;
+import com.google.cloud.firestore.QueryDocumentSnapshot;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class MainController {
 
+    @Autowired
+    private Firestore firestore;
+
     @GetMapping("/")
     String hello() {
         return "Hello!";
     }
 
-    @GetMapping("/dendi")
-    String secret() {
-        return "что такое денди что такое денди\n" +
-                "что так любит детвора\n" +
-                "что такое денди что такое денди\n" +
-                "это электронная игра\n" +
-                "\n" +
-                "Совместно с кирюшовым на треке, уже поздно, играем в денди как владимир познер\n" +
-                "Шуршим как ржб листьевым, бессмысленно\\Надо собраться с мыслями, маслом растительным\\Сдобрили пищу, и мертвый супонев \\Нам подыграет на саксофоне\n" +
-                "Играем в блюз и крутим шарманку,Теткой в кино называли каштанку\n" +
-                "падает планка, поем арэнбэ,доброй ночи ребята, это эл пэ \\рвет крышу ненароком, запиваем соком \\диджей скрю за кодеин зацепился боком , е ай робд, е ай стил,\n" +
-                "е я твоей маме засадил \\себе не навредил, совсем чутка припил\\не хватило сил, но еще пару нахватил\\дел наворотил, кранчи блеку респекты\\слушайте нас и делайте свои конспекты \\рефераты пишем матом, про воздействие на мозг\\Ельцина беспалого прохватил понос\\Упала шляпа, григория гладкова \\Упала на пол, ну и что такова\n" +
-                "Нас не переплюнуть, мы мастера \\Пляшем пара-волк с ночи и до утра\\так проходит время, играем в супер-марио\\он чутка похож на товарища сталина \\после операции разошелся шов\\на припеве подпоет нам модный кирюшов \\\n" +
-                "что такое денди что такое денди\n" +
-                "что так любит детвора\n" +
-                "что такое денди что такое денди\n" +
-                "это электронная игра\n" +
-                "что такое денди что такое денди\n" +
-                "что так любит детвора\n" +
-                "что такое денди что такое денди\n" +
-                "это электронная игра\n" +
-                "что такое денди спросил ди джей ренди\\я ему ответил за ответ плати деньги\\через куплет попозже отвечу\\алла гургеновна применяет свечи\\вспомни когда мы играли в марио\n" +
-                "только при этом присели на палево\\соевый соус затекает в рис мне отсосал эмси карабис\n" +
-                "я посмотрел на его игру\\в ад погрузился человек СКРУ\\репом рулю через пень колоду\n" +
-                "губернатор обнинска фильтрует воду\\модную моду я совершаю и кирюшова оч уважаю\n" +
-                "выросла большая? Выдавай\\зе лп вновь поражают АЙ\\через тоску и всякое прочее\n" +
-                "слушай меня а не многоточие\\е ай рабд е ай стил\\ваня айван культурный настил\n" +
-                "\n" +
-                "что такое денди что такое денди\n" +
-                "что так любит детвора\n" +
-                "что такое денди что такое денди\n" +
-                "это электронная игра\n" +
-                "что такое денди что такое денди\n" +
-                "что так любит детвора\n" +
-                "что такое денди что такое денди\n" +
-                "это электронная игра\n" +
-                "\n";
+    @GetMapping(path = "/db", produces = MediaType.APPLICATION_JSON_VALUE)
+    Object db() throws Exception {
+        Map<String, Object> data = new LinkedHashMap<>();
+
+        for (CollectionReference next : firestore.listCollections()) {
+            List<String> documents = next.get().get().getDocuments()
+                    .stream()
+                    .map(QueryDocumentSnapshot::toString)
+                    .collect(Collectors.toList());
+            data.put(next.getId(), documents);
+        }
+
+        return data;
     }
 }
