@@ -1,7 +1,7 @@
 package com.github.bablo_org.bablo_project.api.model;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.util.Date;
 
 import lombok.Value;
 
@@ -11,10 +11,10 @@ public class Transaction {
     User sender;
     User receiver;
     Currency currency;
-    BigDecimal amount;
+    Double amount;
     String description;
-    LocalDate date;
+    Date date;
     TransactionStatus status;
-    LocalDate created;
-    LocalDate updated;
+    Date created;
+    Date updated;
 }
