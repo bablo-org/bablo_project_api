@@ -3,7 +3,7 @@ package com.github.bablo_org.bablo_project.api.controller;
 import java.util.List;
 
 import com.github.bablo_org.bablo_project.api.model.User;
-import com.github.bablo_org.bablo_project.api.repository.UserService;
+import com.github.bablo_org.bablo_project.api.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;

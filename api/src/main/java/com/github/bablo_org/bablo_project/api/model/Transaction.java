@@ -2,18 +2,20 @@ package com.github.bablo_org.bablo_project.api.model;
 
 import java.util.Date;
 
-import lombok.Value;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
-@Value
+@Data
+@AllArgsConstructor
 public class Transaction {
-    String id;
-    User sender;
-    User receiver;
-    Currency currency;
-    Double amount;
-    String description;
-    Date date;
-    TransactionStatus status;
-    Date created;
-    Date updated;
+    private String id;
+    private String sender;
+    private String receiver;
+    private String currency;
+    private Double amount;
+    private String description;
+    private Date date;
+    private TransactionStatus status;
+    private Date created;
+    private Date updated;
 }

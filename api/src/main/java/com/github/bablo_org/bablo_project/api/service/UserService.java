@@ -1,4 +1,4 @@
-package com.github.bablo_org.bablo_project.api.repository;
+package com.github.bablo_org.bablo_project.api.service;
 
 import static java.util.stream.Collectors.toList;
 
