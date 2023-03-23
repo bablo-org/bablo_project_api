@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "/transactions", produces = MediaType.APPLICATION_JSON_VALUE)
-public class TransactionController {
+public class TransactionController extends BaseController {
 
     private final TransactionService service;
 

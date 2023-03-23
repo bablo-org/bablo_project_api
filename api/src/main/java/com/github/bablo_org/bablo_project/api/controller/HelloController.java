@@ -1,10 +1,15 @@
 package com.github.bablo_org.bablo_project.api.controller;
 
+import com.google.firebase.auth.FirebaseAuth;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class HelloController {
+public class HelloController extends BaseController {
+
+    @Autowired
+    FirebaseAuth firebaseAuth;
 
     @GetMapping("/")
     String hello() {
