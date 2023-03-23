@@ -13,9 +13,11 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -35,12 +37,12 @@ public class TransactionController extends BaseController {
 
     @PostMapping
     @ResponseBody
-    Transaction post(@RequestBody Transaction transaction, @RequestAttribute(USER_TOKEN) FirebaseToken userToken) {
-        return service.add(transaction);
+    Transaction add(@RequestBody Transaction transaction, @RequestAttribute(USER_TOKEN) FirebaseToken userToken) {
+        return service.add(transaction, userToken.getUid());
     }
 
-    @PostMapping("")
-    Transaction put(@RequestBody Transaction transaction, @RequestAttribute(USER_TOKEN) FirebaseToken userToken) {
-        return null;
+    @PutMapping("/{id}/approve")
+    Transaction approve(@RequestParam("id") String id, @RequestAttribute(USER_TOKEN) FirebaseToken userToken) {
+        return service.approve(id, userToken.getUid());
     }
 }

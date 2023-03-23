@@ -6,10 +6,12 @@ import static java.util.stream.Collectors.toList;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import com.github.bablo_org.bablo_project.api.model.Transaction;
 import com.github.bablo_org.bablo_project.api.model.TransactionStatus;
 import com.github.bablo_org.bablo_project.api.utils.StringUtils;
+import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import lombok.RequiredArgsConstructor;
@@ -25,16 +27,10 @@ public class TransactionService {
     private final Firestore firestore;
 
     @SneakyThrows
-    public Transaction getById(String id) {
-        DocumentSnapshot doc = firestore
+    public DocumentReference getById(String id) {
+        return firestore
                 .collection(COLLECTION_NAME)
-                .document(id)
-                .get()
-                .get();
-
-        return doc.exists()
-                ? toModel(doc)
-                : null;
+                .document(id);
     }
 
     @SneakyThrows
@@ -51,8 +47,8 @@ public class TransactionService {
     }
 
     @SneakyThrows
-    public Transaction add(Transaction transaction) {
-        processNew(transaction);
+    public Transaction add(Transaction transaction, String user) {
+        processNew(transaction, user);
 
         DocumentSnapshot doc = firestore.collection(COLLECTION_NAME)
                 .add(transaction)
@@ -64,20 +60,48 @@ public class TransactionService {
     }
 
     @SneakyThrows
-    public Transaction update(Transaction updated) {
-        Transaction current = getById(updated.getId());
+    public Transaction approve(String id, String user) {
+        DocumentReference ref = getById(id);
+        Transaction transaction = toModel(ref);
+        validateApprove(transaction, user);
 
-        processUpdate(current, updated);
+        TransactionStatus status = TransactionStatus.APPROVED;
+        Date now = new Date();
 
-       return null;
+        transaction.setStatus(status);
+        transaction.setUpdated(now);
 
+        ref.update(Map.of(
+                "status", TransactionStatus.APPROVED.name(),
+                "updated", new Date()
+        )).get();
 
+        return transaction;
     }
 
-    private void processNew(Transaction transaction) {
+    private void validateApprove(Transaction transaction, String user) {
+        if (transaction == null) {
+            throw new RuntimeException("can't approve non-existent transaction");
+        }
+
+        if (!transaction.getSender().equals(user)) {
+            throw new RuntimeException("can't approve transaction - current user is not a sender");
+        }
+
+        if (transaction.getStatus() != TransactionStatus.PENDING) {
+            throw new RuntimeException("can't approve transaction - status must be PENDING");
+        }
+    }
+
+    private void processNew(Transaction transaction, String user) {
         validateNew(transaction);
 
-        transaction.setStatus(TransactionStatus.NEW);
+        if (user.equals(transaction.getSender())) {
+            // no reason to approve my own debt
+            transaction.setStatus(TransactionStatus.APPROVED);
+        } else if (user.equals(transaction.getReceiver())) {
+            transaction.setStatus(TransactionStatus.PENDING);
+        }
         transaction.setCreated(new Date());
         transaction.setUpdated(new Date());
     }
@@ -103,6 +127,11 @@ public class TransactionService {
             throw new RuntimeException("can't add transaction with null amount");
         }
 
+        if (transaction.getAmount() < 0.0) {
+            throw new RuntimeException(
+                    "can't add transaction with negative amount (you may replace sender and receiver instead)");
+        }
+
         if (transaction.getDate() == null) {
             throw new RuntimeException("can't add transaction with null date");
         }
@@ -116,16 +145,10 @@ public class TransactionService {
         }
     }
 
-    private void processUpdate(Transaction current, Transaction updated) {
-        validateUpdate(current, updated);
-    }
-
-    private void validateUpdate(Transaction current, Transaction updated) {
-        if (current == null) {
-            throw new RuntimeException("can't update non-existent: " + updated.getId());
-        }
-
-
+    @SneakyThrows
+    private Transaction toModel(DocumentReference ref) {
+        DocumentSnapshot doc = ref.get().get();
+        return doc == null ? null : toModel(doc);
     }
 
     private Transaction toModel(DocumentSnapshot doc) {
