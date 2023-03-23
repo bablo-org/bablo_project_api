@@ -1,5 +1,7 @@
 package com.github.bablo_org.bablo_project.api.service;
 
+import static com.google.cloud.firestore.Filter.equalTo;
+import static com.google.cloud.firestore.Filter.or;
 import static java.util.stream.Collectors.toList;
 
 import java.util.Date;
@@ -23,20 +25,28 @@ public class TransactionService {
     private final Firestore firestore;
 
     @SneakyThrows
-    public List<Transaction> getAll() {
-        return firestore.collection(COLLECTION_NAME)
+    public Transaction getById(String id) {
+        DocumentSnapshot doc = firestore
+                .collection(COLLECTION_NAME)
+                .document(id)
+                .get()
+                .get();
+
+        return doc.exists()
+                ? toModel(doc)
+                : null;
+    }
+
+    @SneakyThrows
+    public List<Transaction> getByUser(String user) {
+        return firestore
+                .collection(COLLECTION_NAME)
+                .where(or(equalTo("sender", user), equalTo("receiver", user)))
                 .get()
                 .get()
                 .getDocuments()
                 .stream()
                 .map(this::toModel)
-                .collect(toList());
-    }
-
-    public List<Transaction> getByUser(String user) {
-        return getAll()
-                .stream()
-                .filter(t -> user.equals(t.getSender()) || user.equals(t.getReceiver()))
                 .collect(toList());
     }
 
@@ -51,6 +61,17 @@ public class TransactionService {
                 .get();
 
         return toModel(doc);
+    }
+
+    @SneakyThrows
+    public Transaction update(Transaction updated) {
+        Transaction current = getById(updated.getId());
+
+        processUpdate(current, updated);
+
+       return null;
+
+
     }
 
     private void processNew(Transaction transaction) {
@@ -93,6 +114,18 @@ public class TransactionService {
         if (transaction.getStatus() != null && transaction.getStatus() != TransactionStatus.NEW) {
             throw new RuntimeException("can't add transaction with status != NEW");
         }
+    }
+
+    private void processUpdate(Transaction current, Transaction updated) {
+        validateUpdate(current, updated);
+    }
+
+    private void validateUpdate(Transaction current, Transaction updated) {
+        if (current == null) {
+            throw new RuntimeException("can't update non-existent: " + updated.getId());
+        }
+
+
     }
 
     private Transaction toModel(DocumentSnapshot doc) {

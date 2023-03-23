@@ -7,6 +7,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.github.bablo_org.bablo_project.api.Constants;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseToken;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +29,7 @@ public class RequestAttributesInitializer implements Filter {
         try {
             String token = ((HttpServletRequest) request).getHeader("Authorization");
             FirebaseToken userToken = firebaseAuth.verifyIdToken(token);
-            request.setAttribute("userToken", userToken);
+            request.setAttribute(Constants.USER_TOKEN, userToken);
 
             filterChain.doFilter(request, response);
         } catch (Exception e) {
