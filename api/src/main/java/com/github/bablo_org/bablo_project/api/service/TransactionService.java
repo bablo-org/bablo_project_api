@@ -26,8 +26,22 @@ public class TransactionService {
 
     private final Firestore firestore;
 
+    public Transaction getById(String id, String user) {
+        Transaction transaction = toModel(getRefById(id));
+
+        if (transaction == null) {
+            return null;
+        }
+
+        if (!user.equals(transaction.getSender()) && !user.equals(transaction.getReceiver())) {
+            throw new RuntimeException("transaction doesn't exist or doesnt' relate to user");
+        }
+
+        return transaction;
+    }
+
     @SneakyThrows
-    public DocumentReference getById(String id) {
+    private DocumentReference getRefById(String id) {
         return firestore
                 .collection(COLLECTION_NAME)
                 .document(id);
@@ -61,7 +75,7 @@ public class TransactionService {
 
     @SneakyThrows
     public Transaction approve(String id, String user) {
-        DocumentReference ref = getById(id);
+        DocumentReference ref = getRefById(id);
         Transaction transaction = toModel(ref);
         validateApprove(transaction, user);
 
@@ -72,11 +86,57 @@ public class TransactionService {
         transaction.setUpdated(now);
 
         ref.update(Map.of(
-                "status", TransactionStatus.APPROVED.name(),
+                "status", status.name(),
                 "updated", new Date()
         )).get();
 
         return transaction;
+    }
+
+    @SneakyThrows
+    public Transaction decline(String id, String user) {
+        DocumentReference ref = getRefById(id);
+        Transaction transaction = toModel(ref);
+        validateDecline(transaction, user);
+
+        TransactionStatus status = TransactionStatus.DECLINED;
+        Date now = new Date();
+
+        transaction.setStatus(status);
+        transaction.setUpdated(now);
+
+        ref.update(Map.of(
+                "status", status.name(),
+                "updated", new Date()
+        )).get();
+
+        return transaction;
+    }
+
+    @SneakyThrows
+    public Transaction complete(String id, String user) {
+        DocumentReference ref = getRefById(id);
+        Transaction transaction = toModel(ref);
+        validateComplete(transaction, user);
+
+        TransactionStatus status = TransactionStatus.COMPLETED;
+        Date now = new Date();
+
+        transaction.setStatus(status);
+        transaction.setUpdated(now);
+
+        ref.update(Map.of(
+                "status", status.name(),
+                "updated", new Date()
+        )).get();
+
+        return transaction;
+    }
+
+    @SneakyThrows
+    public void delete(String id) {
+        DocumentReference ref = getRefById(id);
+        ref.delete().get();
     }
 
     private void validateApprove(Transaction transaction, String user) {
@@ -93,6 +153,34 @@ public class TransactionService {
         }
     }
 
+    private void validateDecline(Transaction transaction, String user) {
+        if (transaction == null) {
+            throw new RuntimeException("can't decline non-existent transaction");
+        }
+
+        if (!transaction.getSender().equals(user)) {
+            throw new RuntimeException("can't decline transaction - current user is not a sender");
+        }
+
+        if (transaction.getStatus() != TransactionStatus.PENDING) {
+            throw new RuntimeException("can't decline transaction - status must be PENDING");
+        }
+    }
+
+    private void validateComplete(Transaction transaction, String user) {
+        if (transaction == null) {
+            throw new RuntimeException("can't complete non-existent transaction");
+        }
+
+        if (!transaction.getReceiver().equals(user)) {
+            throw new RuntimeException("can't complete transaction - current user is not a receiver");
+        }
+
+        if (transaction.getStatus() != TransactionStatus.APPROVED) {
+            throw new RuntimeException("can't complete transaction - status must be APPROVED");
+        }
+    }
+
     private void processNew(Transaction transaction, String user) {
         validateNew(transaction);
 
@@ -102,8 +190,10 @@ public class TransactionService {
         } else if (user.equals(transaction.getReceiver())) {
             transaction.setStatus(TransactionStatus.PENDING);
         }
-        transaction.setCreated(new Date());
-        transaction.setUpdated(new Date());
+
+        Date now = new Date();
+        transaction.setCreated(now);
+        transaction.setUpdated(now);
     }
 
     private void validateNew(Transaction transaction) {
