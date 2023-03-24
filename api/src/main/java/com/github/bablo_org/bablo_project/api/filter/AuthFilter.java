@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class RequestAttributesInitializer implements Filter {
+public class AuthFilter implements Filter {
 
     private final FirebaseAuth firebaseAuth;
 
@@ -31,7 +31,7 @@ public class RequestAttributesInitializer implements Filter {
         HttpServletResponse res = (HttpServletResponse) response;
 
         try {
-            if (!req.getMethod().equals("OPTIONS")) {
+            if (isProtected(req)) {
                 String authorization = req.getHeader("Authorization");
 
                 if (StringUtils.isBlank(authorization)) {
@@ -52,5 +52,11 @@ public class RequestAttributesInitializer implements Filter {
             res.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
             response.getWriter().write(e.getMessage());
         }
+    }
+
+    private boolean isProtected(HttpServletRequest request) {
+        return !request.getMethod().equals("OPTIONS") // exclude preflight requests
+                && !request.getRequestURI().contains("/swagger")
+                && !request.getRequestURI().contains("/api-docs"); // exclude docs endpoint
     }
 }
