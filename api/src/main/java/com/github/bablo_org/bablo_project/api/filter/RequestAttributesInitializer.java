@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.github.bablo_org.bablo_project.api.Constants;
+import com.github.bablo_org.bablo_project.api.utils.StringUtils;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseToken;
 import lombok.RequiredArgsConstructor;
@@ -26,14 +27,29 @@ public class RequestAttributesInitializer implements Filter {
     @Override
     @SneakyThrows
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) {
+        HttpServletRequest req = (HttpServletRequest) request;
+        HttpServletResponse res = (HttpServletResponse) response;
+
         try {
-            String token = ((HttpServletRequest) request).getHeader("Authorization");
-            FirebaseToken userToken = firebaseAuth.verifyIdToken(token);
-            request.setAttribute(Constants.USER_TOKEN, userToken);
+            if (!req.getMethod().equals("OPTIONS")) {
+                String authorization = req.getHeader("Authorization");
+
+                if (StringUtils.isBlank(authorization)) {
+                    res.setStatus(HttpStatus.UNAUTHORIZED.value());
+                    res.getWriter().write("unauthorized");
+                    return;
+                }
+
+                String token = authorization.contains(" ")
+                        ? authorization.split(" ")[1]
+                        : authorization;
+                FirebaseToken userToken = firebaseAuth.verifyIdToken(token);
+                request.setAttribute(Constants.USER_TOKEN, userToken);
+            }
 
             filterChain.doFilter(request, response);
         } catch (Exception e) {
-            ((HttpServletResponse) response).setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            res.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
             response.getWriter().write(e.getMessage());
         }
     }
