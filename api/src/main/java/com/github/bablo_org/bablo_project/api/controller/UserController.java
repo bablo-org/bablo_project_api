@@ -25,7 +25,6 @@ public class UserController extends BaseController {
     }
 
     @PutMapping("/updateProfile")
-
     User updateProfile(@RequestBody User user, @RequestAttribute(USER_TOKEN) FirebaseToken userToken) {
         return service.updateCurrentProfile(user, userToken.getUid());
     }
