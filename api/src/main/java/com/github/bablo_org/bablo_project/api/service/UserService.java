@@ -2,16 +2,18 @@ package com.github.bablo_org.bablo_project.api.service;
 
 import static java.util.stream.Collectors.toList;
 
-import java.util.Date;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
-import com.github.bablo_org.bablo_project.api.model.Transaction;
-import com.github.bablo_org.bablo_project.api.model.TransactionStatus;
 import com.github.bablo_org.bablo_project.api.model.User;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
+import com.google.cloud.storage.Blob;
+import com.google.cloud.storage.BlobInfo;
+import com.google.cloud.storage.Storage;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
@@ -19,8 +21,14 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class UserService {
-    private static final String COLLECTION_NAME = "users";
+
+    private static final String DB_COLLECTION_NAME = "users";
+
+    private static final String STORAGE_BUCKET_NAME = "artifacts.bablo-project.appspot.com";
+
     private final Firestore firestore;
+
+    private final Storage cloudStorage;
 
     @SneakyThrows
     public List<User> getAll() {
@@ -33,6 +41,7 @@ public class UserService {
                         doc.getId(),
                         doc.getString("name"),
                         doc.getString("email"),
+                        doc.getString("avatar"),
                         doc.getDate("created")
                 ))
                 .collect(toList());
@@ -43,7 +52,7 @@ public class UserService {
         DocumentReference ref = getRefById(callerId);
         DocumentSnapshot doc = ref.get().get();
         if (!doc.exists()) {
-            new RuntimeException("User with such id does note exist");
+            throw new RuntimeException("User with such id does note exist");
         }
 
         User recorderUser = toModel(doc);
@@ -57,10 +66,22 @@ public class UserService {
         return recorderUser;
     }
 
+    public String uploadAvatar(byte[] content, String user) {
+        String fileName = "avatars/avatar-" + user; // "avatars" is a folder inside a bucket
+        BlobInfo info = BlobInfo.newBuilder(STORAGE_BUCKET_NAME, fileName)
+                .build();
+        try (InputStream is = new ByteArrayInputStream(content)) {
+            Blob blob = cloudStorage.createFrom(info, is);
+            return blob.getMediaLink();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @SneakyThrows
     private DocumentReference getRefById(String id) {
         return firestore
-                .collection(COLLECTION_NAME)
+                .collection(DB_COLLECTION_NAME)
                 .document(id);
     }
 
@@ -69,11 +90,12 @@ public class UserService {
                 doc.getId(),
                 doc.getString("name"),
                 doc.getString("email"),
+                doc.getString("avatar"),
                 doc.getDate("created")
         );
     }
 
-    private void validateUpdateProfile (User user, String callerId) {
+    private void validateUpdateProfile(User user, String callerId) {
         if (user == null) {
             throw new RuntimeException("can't update non-existent user");
         }

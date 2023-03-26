@@ -5,24 +5,30 @@ import java.io.InputStream;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.FirestoreOptions;
+import com.google.cloud.storage.Storage;
+import com.google.cloud.storage.StorageOptions;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 @Configuration
 public class BeansConfiguration {
 
     @Bean
-    GoogleCredentials credentials(@Value("${profile}") String profile) throws Exception {
-        if ("local".equalsIgnoreCase(profile)) {
-            InputStream serviceAccount = getClass().getClassLoader().getResourceAsStream("secrets.json");
-            return GoogleCredentials.fromStream(serviceAccount);
-        } else {
-            return GoogleCredentials.getApplicationDefault();
-        }
+    @Profile("local")
+    GoogleCredentials credentialsLocal() throws Exception {
+        InputStream serviceAccount = getClass().getClassLoader().getResourceAsStream("secrets.json");
+        return GoogleCredentials.fromStream(serviceAccount);
+    }
+
+    @Bean
+    @Profile("!local")
+    GoogleCredentials credentialsCloud() throws Exception {
+        return GoogleCredentials.getApplicationDefault();
     }
 
     @Bean
@@ -33,6 +39,16 @@ public class BeansConfiguration {
                 .build();
 
         return firestoreOptions.getService();
+    }
+
+    @Bean
+    Storage cloudStorage(@Value("${project.id}") String projectId, GoogleCredentials credentials) {
+        StorageOptions options = StorageOptions.getDefaultInstance().toBuilder()
+                .setProjectId(projectId)
+                .setCredentials(credentials)
+                .build();
+
+        return options.getService();
     }
 
     @Bean
