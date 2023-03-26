@@ -11,6 +11,7 @@ import com.google.firebase.auth.FirebaseToken;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -36,7 +37,7 @@ public class UserController extends BaseController {
         return service.updateCurrentProfile(user, userToken.getUid());
     }
 
-    @PutMapping(value = "/updateAvatar", produces = MediaType.TEXT_PLAIN_VALUE)
+    @PostMapping(value = "/uploadAvatar", produces = MediaType.TEXT_PLAIN_VALUE)
     String uploadAvatar(@RequestBody String base64Content, @RequestAttribute(USER_TOKEN) FirebaseToken userToken) {
         return service.uploadAvatar(Base64.getDecoder().decode(base64Content), userToken.getUid());
     }
