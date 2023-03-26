@@ -36,7 +36,7 @@ public class UserController extends BaseController {
         return service.updateCurrentProfile(user, userToken.getUid());
     }
 
-    @PutMapping("/updateAvatar")
+    @PutMapping(value = "/updateAvatar", produces = MediaType.TEXT_PLAIN_VALUE)
     String uploadAvatar(@RequestBody String base64Content, @RequestAttribute(USER_TOKEN) FirebaseToken userToken) {
         return service.uploadAvatar(Base64.getDecoder().decode(base64Content), userToken.getUid());
     }
