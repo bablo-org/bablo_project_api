@@ -2,11 +2,14 @@ package com.github.bablo_org.bablo_project.api.service;
 
 import static com.google.cloud.firestore.Filter.equalTo;
 import static com.google.cloud.firestore.Filter.or;
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import com.github.bablo_org.bablo_project.api.model.Transaction;
 import com.github.bablo_org.bablo_project.api.model.TransactionStatus;
@@ -65,7 +68,7 @@ public class TransactionService {
         processNew(transaction, user);
 
         DocumentSnapshot doc = firestore.collection(COLLECTION_NAME)
-                .add(transaction)
+                .add(toMap(transaction))
                 .get()
                 .get()
                 .get();
@@ -254,5 +257,22 @@ public class TransactionService {
                 doc.getDate("created"),
                 doc.getDate("updated")
         );
+    }
+
+    private Map<String, Object> toMap(Transaction transaction) {
+        Map<String, Object> map = new HashMap<>();
+
+        ofNullable(transaction.getId()).ifPresent(v -> map.put("id", v));
+        ofNullable(transaction.getSender()).ifPresent(v -> map.put("sender", v));
+        ofNullable(transaction.getReceiver()).ifPresent(v -> map.put("receiver", v));
+        ofNullable(transaction.getCurrency()).ifPresent(v -> map.put("currency", v));
+        ofNullable(transaction.getAmount()).ifPresent(v -> map.put("amount", v));
+        ofNullable(transaction.getDescription()).ifPresent(v -> map.put("description", v));
+        ofNullable(transaction.getDate()).ifPresent(v -> map.put("date", v));
+        ofNullable(transaction.getStatus()).ifPresent(v -> map.put("status", v.name()));
+        ofNullable(transaction.getCreated()).ifPresent(v -> map.put("created", v));
+        ofNullable(transaction.getUpdated()).ifPresent(v -> map.put("updated", v));
+
+        return map;
     }
 }
