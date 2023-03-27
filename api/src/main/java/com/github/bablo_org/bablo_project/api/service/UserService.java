@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
+import com.github.bablo_org.bablo_project.api.model.StorageFile;
 import com.github.bablo_org.bablo_project.api.model.User;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
@@ -66,13 +67,13 @@ public class UserService {
         return recorderUser;
     }
 
-    public String uploadAvatar(byte[] content, String user) {
+    public StorageFile uploadAvatar(byte[] content, String user) {
         String fileName = "avatars/avatar-" + user; // "avatars" is a folder inside a bucket
         BlobInfo info = BlobInfo.newBuilder(STORAGE_BUCKET_NAME, fileName)
                 .build();
         try (InputStream is = new ByteArrayInputStream(content)) {
             Blob blob = cloudStorage.createFrom(info, is);
-            return blob.getMediaLink();
+            return new StorageFile(blob.getMediaLink());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

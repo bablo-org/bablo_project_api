@@ -5,6 +5,7 @@ import static com.github.bablo_org.bablo_project.api.Constants.USER_TOKEN;
 import java.util.Base64;
 import java.util.List;
 
+import com.github.bablo_org.bablo_project.api.model.StorageFile;
 import com.github.bablo_org.bablo_project.api.model.User;
 import com.github.bablo_org.bablo_project.api.service.UserService;
 import com.google.firebase.auth.FirebaseToken;
@@ -38,7 +39,7 @@ public class UserController extends BaseController {
     }
 
     @PostMapping(value = "/uploadAvatar")
-    String uploadAvatar(@RequestBody String base64Content, @RequestAttribute(USER_TOKEN) FirebaseToken userToken) {
+    StorageFile uploadAvatar(@RequestBody String base64Content, @RequestAttribute(USER_TOKEN) FirebaseToken userToken) {
         return service.uploadAvatar(Base64.getDecoder().decode(base64Content), userToken.getUid());
     }
 }
