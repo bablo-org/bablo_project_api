@@ -69,7 +69,7 @@ public class UserService {
 
         Map<String, Object> fields = new HashMap<>();
         ofNullable(update.getAvatar()).ifPresent(v -> fields.put("avatar", v));
-        ofNullable(update.getName()).ifPresent(v -> fields.put("name", update.getName()));
+        ofNullable(update.getName()).ifPresent(v -> fields.put("name", v));
 
         if (!fields.isEmpty()) {
             ref.update(fields).get();
