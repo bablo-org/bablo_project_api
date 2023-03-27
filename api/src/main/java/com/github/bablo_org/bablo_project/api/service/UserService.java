@@ -1,9 +1,11 @@
 package com.github.bablo_org.bablo_project.api.service;
 
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -49,22 +51,31 @@ public class UserService {
     }
 
     @SneakyThrows
-    public User updateCurrentProfile(User user, String callerId) {
+    public User updateCurrentProfile(User update, String callerId) {
         DocumentReference ref = getRefById(callerId);
         DocumentSnapshot doc = ref.get().get();
         if (!doc.exists()) {
             throw new RuntimeException("User with such id does note exist");
         }
 
-        User recorderUser = toModel(doc);
-        validateUpdateProfile(recorderUser, callerId);
-        recorderUser.setName(user.getName());
+        User user = toModel(doc);
+        validateUpdateProfile(user, callerId);
+        if (update.getName() != null) {
+            user.setName(update.getName());
+        }
+        if (update.getAvatar() != null) {
+            user.setAvatar(update.getAvatar());
+        }
 
-        ref.update(Map.of(
-                "name", user.getName()
-        )).get();
+        Map<String, Object> fields = new HashMap<>();
+        ofNullable(update.getAvatar()).ifPresent(v -> fields.put("avatar", v));
+        ofNullable(update.getName()).ifPresent(v -> fields.put("name", update.getName()));
 
-        return recorderUser;
+        if (!fields.isEmpty()) {
+            ref.update(fields).get();
+        }
+
+        return user;
     }
 
     public StorageFile uploadAvatar(byte[] content, String user) {
