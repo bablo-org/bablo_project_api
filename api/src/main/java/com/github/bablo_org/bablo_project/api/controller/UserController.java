@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -39,7 +40,9 @@ public class UserController extends BaseController {
     }
 
     @PostMapping(value = "/uploadAvatar")
-    StorageFile uploadAvatar(@RequestBody String base64Content, @RequestAttribute(USER_TOKEN) FirebaseToken userToken) {
-        return service.uploadAvatar(Base64.getDecoder().decode(base64Content), userToken.getUid());
+    StorageFile uploadAvatar(@RequestParam("fileName") String fileName,
+                             @RequestBody String base64Content,
+                             @RequestAttribute(USER_TOKEN) FirebaseToken userToken) {
+        return service.uploadAvatar(fileName, Base64.getDecoder().decode(base64Content), userToken.getUid());
     }
 }

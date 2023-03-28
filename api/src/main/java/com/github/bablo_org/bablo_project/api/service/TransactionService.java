@@ -9,7 +9,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import com.github.bablo_org.bablo_project.api.model.Transaction;
 import com.github.bablo_org.bablo_project.api.model.TransactionStatus;

@@ -1,5 +1,6 @@
 package com.github.bablo_org.bablo_project.api.service;
 
+import static java.util.Comparator.comparing;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 
@@ -8,6 +9,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.StreamSupport;
 
 import com.github.bablo_org.bablo_project.api.model.StorageFile;
 import com.github.bablo_org.bablo_project.api.model.User;
@@ -19,15 +21,19 @@ import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.Storage;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
     private static final String DB_COLLECTION_NAME = "users";
 
-    private static final String STORAGE_BUCKET_NAME = "artifacts.bablo-project.appspot.com";
+    private static final String STORAGE_BUCKET_NAME = "bablo-project.appspot.com";
+
+    private static final String STORAGE_AVATARS_DIRECTORY = "avatars";
 
     private final Firestore firestore;
 
@@ -78,16 +84,33 @@ public class UserService {
         return user;
     }
 
-    public StorageFile uploadAvatar(byte[] content, String user) {
-        String fileName = "avatars/avatar-" + user; // "avatars" is a folder inside a bucket
-        BlobInfo info = BlobInfo.newBuilder(STORAGE_BUCKET_NAME, fileName)
-                .build();
+    public StorageFile uploadAvatar(String fileName, byte[] content, String user) {
+        String personalizedFileName = user + "-" + fileName; // 2+ users may upload avatar with the same name
+        String filePath = STORAGE_AVATARS_DIRECTORY + "/" + personalizedFileName;
+        BlobInfo blobInfo = BlobInfo.newBuilder(STORAGE_BUCKET_NAME, filePath).build();
         try (InputStream is = new ByteArrayInputStream(content)) {
-            Blob blob = cloudStorage.createFrom(info, is);
+            Blob blob = cloudStorage.createFrom(blobInfo, is);
+            try {
+                deletePreviousAvatars(user);
+            } catch (Exception e) {
+                log.error("failed to delete previous avatars", e);
+            }
             return new StorageFile(blob.getMediaLink());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private void deletePreviousAvatars(String user) {
+        Iterable<Blob> allAvatars = cloudStorage.get(STORAGE_BUCKET_NAME)
+                .list(Storage.BlobListOption.prefix(STORAGE_AVATARS_DIRECTORY))
+                .iterateAll();
+
+        StreamSupport.stream(allAvatars.spliterator(), false)
+                .filter(blob -> blob.getName().startsWith(STORAGE_AVATARS_DIRECTORY + "/" + user + "-"))
+                .sorted(comparing(BlobInfo::getUpdateTimeOffsetDateTime).reversed())
+                .skip(1)
+                .forEach(Blob::delete);
     }
 
     @SneakyThrows
