@@ -95,7 +95,7 @@ public class UserService {
             } catch (Exception e) {
                 log.error("failed to delete previous avatars", e);
             }
-            return new StorageFile(blob.getMediaLink());
+            return new StorageFile(blob.getBlobId().getName());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
