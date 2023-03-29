@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.StreamSupport;
 
+import javax.annotation.Nullable;
+
 import com.github.bablo_org.bablo_project.api.model.StorageFile;
 import com.github.bablo_org.bablo_project.api.model.User;
 import com.google.cloud.firestore.DocumentReference;
@@ -41,13 +43,19 @@ public class UserService {
 
     @SneakyThrows
     public List<User> getAll() {
-        return firestore.collection("users")
+        return firestore.collection(DB_COLLECTION_NAME)
                 .get()
                 .get()
                 .getDocuments()
                 .stream()
                 .map(this::toModel)
                 .collect(toList());
+    }
+
+    @SneakyThrows
+    public User getById(String id) {
+        DocumentReference ref = getRefById(id);
+        return toModel(ref.get().get());
     }
 
     @SneakyThrows
