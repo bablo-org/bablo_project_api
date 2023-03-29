@@ -6,6 +6,7 @@ import java.util.Base64;
 import java.util.List;
 
 import com.github.bablo_org.bablo_project.api.model.StorageFile;
+import com.github.bablo_org.bablo_project.api.model.UpdateUserProfileRequest;
 import com.github.bablo_org.bablo_project.api.model.User;
 import com.github.bablo_org.bablo_project.api.service.UserService;
 import com.google.firebase.auth.FirebaseToken;
@@ -35,8 +36,8 @@ public class UserController extends BaseController {
     }
 
     @PutMapping("/updateProfile")
-    User updateProfile(@RequestBody User user, @RequestAttribute(USER_TOKEN) FirebaseToken userToken) {
-        return service.updateCurrentProfile(user, userToken.getUid());
+    User updateProfile(@RequestBody UpdateUserProfileRequest request, @RequestAttribute(USER_TOKEN) FirebaseToken userToken) {
+        return service.updateCurrentProfile(request.getName(), request.getAvatar(), userToken.getUid());
     }
 
     @PostMapping(value = "/uploadAvatar")

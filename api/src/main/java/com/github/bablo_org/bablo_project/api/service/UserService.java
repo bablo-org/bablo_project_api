@@ -51,7 +51,7 @@ public class UserService {
     }
 
     @SneakyThrows
-    public User updateCurrentProfile(User update, String callerId) {
+    public User updateCurrentProfile(String name, String avatar, String callerId) {
         DocumentReference ref = getRefById(callerId);
         DocumentSnapshot doc = ref.get().get();
         if (!doc.exists()) {
@@ -60,16 +60,16 @@ public class UserService {
 
         User user = toModel(doc);
         validateUpdateProfile(user, callerId);
-        if (update.getName() != null) {
-            user.setName(update.getName());
-        }
-        if (update.getAvatar() != null) {
-            user.setAvatar(update.getAvatar());
-        }
 
         Map<String, Object> fields = new HashMap<>();
-        ofNullable(update.getAvatar()).ifPresent(v -> fields.put("avatar", v));
-        ofNullable(update.getName()).ifPresent(v -> fields.put("name", v));
+        if (name != null) {
+            user.setName(name);
+            fields.put("name", name);
+        }
+        if (avatar != null) {
+            user.setAvatar(avatar);
+            fields.put("avatar", avatar);
+        }
 
         if (!fields.isEmpty()) {
             ref.update(fields).get();
