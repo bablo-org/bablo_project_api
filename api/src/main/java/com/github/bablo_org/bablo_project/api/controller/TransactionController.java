@@ -73,7 +73,7 @@ public class TransactionController extends BaseController {
                 .build();
     }
 
-    @DeleteMapping("/delete")
+    @DeleteMapping
     ResponseEntity<String> delete(@RequestBody List<String> ids, @RequestAttribute(USER_TOKEN) FirebaseToken userToken) {
         service.delete(ids, userToken.getUid());
         return ResponseEntity
