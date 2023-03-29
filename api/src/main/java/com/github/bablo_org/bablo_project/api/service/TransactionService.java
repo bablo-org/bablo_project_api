@@ -1,6 +1,7 @@
 package com.github.bablo_org.bablo_project.api.service;
 
 import static com.google.cloud.firestore.FieldPath.documentId;
+import static com.google.cloud.firestore.Filter.and;
 import static com.google.cloud.firestore.Filter.equalTo;
 import static com.google.cloud.firestore.Filter.inArray;
 import static com.google.cloud.firestore.Filter.or;
@@ -19,6 +20,7 @@ import com.github.bablo_org.bablo_project.api.utils.StringUtils;
 import com.google.cloud.firestore.CollectionReference;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
+import com.google.cloud.firestore.Filter;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.WriteBatch;
 import lombok.RequiredArgsConstructor;
@@ -57,10 +59,15 @@ public class TransactionService {
     }
 
     @SneakyThrows
-    public List<Transaction> getByUser(String user) {
+    public List<Transaction> getByUser(String user, List<String> statuses) {
+        Filter filter = or(equalTo("sender", user), equalTo("receiver", user));
+        if (statuses != null) {
+            filter = and(filter, inArray("status", statuses));
+        }
+
         return firestore
                 .collection(COLLECTION_NAME)
-                .where(or(equalTo("sender", user), equalTo("receiver", user)))
+                .where(filter)
                 .get()
                 .get()
                 .getDocuments()

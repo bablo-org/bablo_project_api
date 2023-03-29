@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -30,8 +31,8 @@ public class TransactionController extends BaseController {
 
     @GetMapping
     @ResponseBody
-    List<Transaction> getByUser(@RequestAttribute(USER_TOKEN) FirebaseToken userToken) {
-        return service.getByUser(userToken.getUid());
+    List<Transaction> getAll(@RequestParam("status") List<String> statuses, @RequestAttribute(USER_TOKEN) FirebaseToken userToken) {
+        return service.getByUser(userToken.getUid(), statuses);
     }
 
     @GetMapping("/{id}")
