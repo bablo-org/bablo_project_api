@@ -31,7 +31,7 @@ public class TransactionController extends BaseController {
 
     @GetMapping
     @ResponseBody
-    List<Transaction> getAll(@RequestParam("status") List<String> statuses, @RequestAttribute(USER_TOKEN) FirebaseToken userToken) {
+    List<Transaction> getAll(@RequestParam(value = "status", required = false) List<String> statuses, @RequestAttribute(USER_TOKEN) FirebaseToken userToken) {
         return service.getByUser(userToken.getUid(), statuses);
     }
 
