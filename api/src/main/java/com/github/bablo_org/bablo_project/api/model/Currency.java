@@ -8,6 +8,8 @@ import lombok.Value;
 public class Currency {
     String id;
     String name;
+    String symbol;
+    boolean isActive;
     Double rate;
     Date updated;
 }
