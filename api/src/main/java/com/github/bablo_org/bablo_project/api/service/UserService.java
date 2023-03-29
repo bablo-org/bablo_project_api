@@ -46,13 +46,7 @@ public class UserService {
                 .get()
                 .getDocuments()
                 .stream()
-                .map(doc -> new User(
-                        doc.getId(),
-                        doc.getString("name"),
-                        doc.getString("email"),
-                        doc.getString("avatar"),
-                        doc.getDate("created")
-                ))
+                .map(this::toModel)
                 .collect(toList());
     }
 
@@ -126,7 +120,8 @@ public class UserService {
                 doc.getString("name"),
                 doc.getString("email"),
                 doc.getString("avatar"),
-                doc.getDate("created")
+                doc.getDate("created"),
+                ofNullable(doc.getBoolean("isAdmin")).orElse(false)
         );
     }
 

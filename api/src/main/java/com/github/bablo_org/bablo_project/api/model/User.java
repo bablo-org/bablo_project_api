@@ -15,4 +15,5 @@ public class User {
     private String email;
     private String avatar;
     private Date created;
+    private boolean isAdmin;
 }
