@@ -1,6 +1,8 @@
 package com.github.bablo_org.bablo_project.api.service;
 
+import static com.google.cloud.firestore.FieldPath.documentId;
 import static com.google.cloud.firestore.Filter.equalTo;
+import static com.google.cloud.firestore.Filter.inArray;
 import static com.google.cloud.firestore.Filter.or;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
@@ -12,10 +14,13 @@ import java.util.Map;
 
 import com.github.bablo_org.bablo_project.api.model.Transaction;
 import com.github.bablo_org.bablo_project.api.model.TransactionStatus;
+import com.github.bablo_org.bablo_project.api.model.User;
 import com.github.bablo_org.bablo_project.api.utils.StringUtils;
+import com.google.cloud.firestore.CollectionReference;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
+import com.google.cloud.firestore.WriteBatch;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
@@ -27,6 +32,8 @@ public class TransactionService {
     private static final String COLLECTION_NAME = "transactions";
 
     private final Firestore firestore;
+
+    private final UserService userService;
 
     public Transaction getById(String id, String user) {
         Transaction transaction = toModel(getRefById(id));
@@ -63,123 +70,146 @@ public class TransactionService {
     }
 
     @SneakyThrows
-    public Transaction add(Transaction transaction, String user) {
-        processNew(transaction, user);
+    public void add(List<Transaction> transactions, String user) {
+        transactions.forEach(t -> processNew(t, user));
 
-        DocumentSnapshot doc = firestore.collection(COLLECTION_NAME)
-                .add(toMap(transaction))
+        WriteBatch batch = firestore.batch();
+        CollectionReference collection = firestore.collection(COLLECTION_NAME);
+
+        transactions.forEach(t -> {
+            batch.set(collection.document(), toMap(t));
+        });
+        batch.commit().get();
+    }
+
+    @SneakyThrows
+    public void approve(List<String> ids, String user) {
+        List<DocumentSnapshot> documents = getByIds(ids);
+
+        for (DocumentSnapshot document : documents) {
+            Transaction transaction = toModel(document);
+            validateApprove(transaction, user);
+        }
+
+        Date now = new Date();
+        WriteBatch batch = firestore.batch();
+
+        for (DocumentSnapshot document : documents) {
+            batch.update(document.getReference(), Map.of(
+                    "status", TransactionStatus.APPROVED.name(),
+                    "updated", now
+            ));
+        }
+        batch.commit().get();
+    }
+
+    @SneakyThrows
+    public void decline(List<String> ids, String user) {
+        List<DocumentSnapshot> documents = getByIds(ids);
+
+        for (DocumentSnapshot document : documents) {
+            Transaction transaction = toModel(document);
+            validateDecline(transaction, user);
+        }
+
+        Date now = new Date();
+        WriteBatch batch = firestore.batch();
+
+        for (DocumentSnapshot document : documents) {
+            batch.update(document.getReference(), Map.of(
+                    "status", TransactionStatus.DECLINED.name(),
+                    "updated", now
+            ));
+        }
+        batch.commit().get();
+    }
+
+    @SneakyThrows
+    public void complete(List<String> ids, String user) {
+        List<DocumentSnapshot> documents = getByIds(ids);
+
+        for (DocumentSnapshot document : documents) {
+            Transaction transaction = toModel(document);
+            validateComplete(transaction, user);
+        }
+
+        Date now = new Date();
+        WriteBatch batch = firestore.batch();
+
+        for (DocumentSnapshot document : documents) {
+            batch.update(document.getReference(), Map.of(
+                    "status", TransactionStatus.COMPLETED.name(),
+                    "updated", now
+            ));
+        }
+        batch.commit().get();
+    }
+
+    @SneakyThrows
+    public void delete(List<String> ids, String userId) {
+        User user = userService.getById(userId);
+        if (!user.isAdmin()) {
+            throw new RuntimeException("only admin has permission to delete transactions (even this is temporary)");
+        }
+
+        List<DocumentSnapshot> documents = getByIds(ids);
+
+        WriteBatch batch = firestore.batch();
+        documents.forEach(doc -> batch.delete(doc.getReference()));
+        batch.commit().get();
+    }
+
+    @SneakyThrows
+    private List<DocumentSnapshot> getByIds(List<String> ids) {
+        return firestore.collection(COLLECTION_NAME)
+                .where(inArray(documentId(), ids))
                 .get()
                 .get()
-                .get();
-
-        return toModel(doc);
-    }
-
-    @SneakyThrows
-    public Transaction approve(String id, String user) {
-        DocumentReference ref = getRefById(id);
-        Transaction transaction = toModel(ref);
-        validateApprove(transaction, user);
-
-        TransactionStatus status = TransactionStatus.APPROVED;
-        Date now = new Date();
-
-        transaction.setStatus(status);
-        transaction.setUpdated(now);
-
-        ref.update(Map.of(
-                "status", status.name(),
-                "updated", new Date()
-        )).get();
-
-        return transaction;
-    }
-
-    @SneakyThrows
-    public Transaction decline(String id, String user) {
-        DocumentReference ref = getRefById(id);
-        Transaction transaction = toModel(ref);
-        validateDecline(transaction, user);
-
-        TransactionStatus status = TransactionStatus.DECLINED;
-        Date now = new Date();
-
-        transaction.setStatus(status);
-        transaction.setUpdated(now);
-
-        ref.update(Map.of(
-                "status", status.name(),
-                "updated", new Date()
-        )).get();
-
-        return transaction;
-    }
-
-    @SneakyThrows
-    public Transaction complete(String id, String user) {
-        DocumentReference ref = getRefById(id);
-        Transaction transaction = toModel(ref);
-        validateComplete(transaction, user);
-
-        TransactionStatus status = TransactionStatus.COMPLETED;
-        Date now = new Date();
-
-        transaction.setStatus(status);
-        transaction.setUpdated(now);
-
-        ref.update(Map.of(
-                "status", status.name(),
-                "updated", new Date()
-        )).get();
-
-        return transaction;
-    }
-
-    @SneakyThrows
-    public void delete(String id) {
-        DocumentReference ref = getRefById(id);
-        ref.delete().get();
+                .getDocuments()
+                .stream()
+                .map(DocumentSnapshot.class::cast)
+                .collect(toList());
     }
 
     private void validateApprove(Transaction transaction, String user) {
         if (transaction == null) {
-            throw new RuntimeException("can't approve non-existent transaction");
+            throw new RuntimeException("can't approve non-existent transaction: " + transaction);
         }
 
         if (!transaction.getSender().equals(user)) {
-            throw new RuntimeException("can't approve transaction - current user is not a sender");
+            throw new RuntimeException("can't approve transaction - current user is not a sender: " + transaction);
         }
 
         if (transaction.getStatus() != TransactionStatus.PENDING) {
-            throw new RuntimeException("can't approve transaction - status must be PENDING");
+            throw new RuntimeException("can't approve transaction - status must be PENDING: " + transaction);
         }
     }
 
     private void validateDecline(Transaction transaction, String user) {
         if (transaction == null) {
-            throw new RuntimeException("can't decline non-existent transaction");
+            throw new RuntimeException("can't decline non-existent transaction: " + transaction);
         }
 
         if (!transaction.getSender().equals(user)) {
-            throw new RuntimeException("can't decline transaction - current user is not a sender");
+            throw new RuntimeException("can't decline transaction - current user is not a sender: " + transaction);
         }
 
         if (transaction.getStatus() != TransactionStatus.PENDING) {
-            throw new RuntimeException("can't decline transaction - status must be PENDING");
+            throw new RuntimeException("can't decline transaction - status must be PENDING: " + transaction);
         }
     }
 
     private void validateComplete(Transaction transaction, String user) {
         if (transaction == null) {
-            throw new RuntimeException("can't complete non-existent transaction");
+            throw new RuntimeException("can't complete non-existent transaction: " + transaction);
         }
 
         if (!transaction.getReceiver().equals(user)) {
-            throw new RuntimeException("can't complete transaction - current user is not a receiver");
+            throw new RuntimeException("can't complete transaction - current user is not a receiver: " + transaction);
         }
 
         if (transaction.getStatus() != TransactionStatus.APPROVED) {
-            throw new RuntimeException("can't complete transaction - status must be APPROVED");
+            throw new RuntimeException("can't complete transaction - status must be APPROVED: " + transaction);
         }
     }
 
@@ -200,40 +230,40 @@ public class TransactionService {
 
     private void validateNew(Transaction transaction) {
         if (StringUtils.isBlank(transaction.getReceiver())) {
-            throw new RuntimeException("can't add transaction with blank receiver");
+            throw new RuntimeException("can't add transaction with blank receiver: " + transaction);
         }
 
         if (StringUtils.isBlank(transaction.getSender())) {
-            throw new RuntimeException("can't add transaction with blank sender");
+            throw new RuntimeException("can't add transaction with blank sender: " + transaction);
         }
 
         if (transaction.getSender().equals(transaction.getReceiver())) {
-            throw new RuntimeException("can't add transaction with the same sender and receiver");
+            throw new RuntimeException("can't add transaction with the same sender and receiver: " + transaction);
         }
 
         if (StringUtils.isBlank(transaction.getCurrency())) {
-            throw new RuntimeException("can't add transaction with blank currency");
+            throw new RuntimeException("can't add transaction with blank currency: " + transaction);
         }
 
         if (transaction.getAmount() == null) {
-            throw new RuntimeException("can't add transaction with null amount");
+            throw new RuntimeException("can't add transaction with null amount: " + transaction);
         }
 
         if (transaction.getAmount() < 0.0) {
             throw new RuntimeException(
-                    "can't add transaction with negative amount (you may replace sender and receiver instead)");
+                    "can't add transaction with negative amount (you may replace sender and receiver instead): " + transaction);
         }
 
         if (transaction.getDate() == null) {
-            throw new RuntimeException("can't add transaction with null date");
+            throw new RuntimeException("can't add transaction with null date: " + transaction);
         }
 
         if (StringUtils.isBlank(transaction.getDescription())) {
-            throw new RuntimeException("can't add transaction with blank description");
+            throw new RuntimeException("can't add transaction with blank description: " + transaction);
         }
 
         if (transaction.getStatus() != null && transaction.getStatus() != TransactionStatus.NEW) {
-            throw new RuntimeException("can't add transaction with status != NEW");
+            throw new RuntimeException("can't add transaction with status != NEW: " + transaction);
         }
     }
 

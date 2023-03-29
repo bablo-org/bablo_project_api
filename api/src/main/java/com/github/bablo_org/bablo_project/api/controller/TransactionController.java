@@ -9,6 +9,7 @@ import com.github.bablo_org.bablo_project.api.service.TransactionService;
 import com.google.firebase.auth.FirebaseToken;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -41,28 +42,42 @@ public class TransactionController extends BaseController {
 
     @PostMapping
     @ResponseBody
-    Transaction add(@RequestBody Transaction transaction, @RequestAttribute(USER_TOKEN) FirebaseToken userToken) {
-        return service.add(transaction, userToken.getUid());
+    ResponseEntity<String> add(@RequestBody List<Transaction> transaction, @RequestAttribute(USER_TOKEN) FirebaseToken userToken) {
+        service.add(transaction, userToken.getUid());
+        return ResponseEntity
+                .ok()
+                .build();
     }
 
-    @PutMapping("/{id}/approve")
-    Transaction approve(@PathVariable("id") String id, @RequestAttribute(USER_TOKEN) FirebaseToken userToken) {
-        return service.approve(id, userToken.getUid());
+    @PutMapping("/approve")
+    ResponseEntity<String> approve(@RequestBody List<String> ids, @RequestAttribute(USER_TOKEN) FirebaseToken userToken) {
+        service.approve(ids, userToken.getUid());
+        return ResponseEntity
+                .ok()
+                .build();
     }
 
-    @PutMapping("/{id}/decline")
-    Transaction decline(@PathVariable("id") String id, @RequestAttribute(USER_TOKEN) FirebaseToken userToken) {
-        return service.decline(id, userToken.getUid());
+    @PutMapping("/decline")
+    ResponseEntity<String> decline(@RequestBody List<String> ids, @RequestAttribute(USER_TOKEN) FirebaseToken userToken) {
+        service.decline(ids, userToken.getUid());
+        return ResponseEntity
+                .ok()
+                .build();
     }
 
-    @PutMapping("/{id}/complete")
-    Transaction complete(@PathVariable("id") String id, @RequestAttribute(USER_TOKEN) FirebaseToken userToken) {
-        return service.complete(id, userToken.getUid());
+    @PutMapping("/complete")
+    ResponseEntity<String> complete(@RequestBody List<String> ids, @RequestAttribute(USER_TOKEN) FirebaseToken userToken) {
+        service.complete(ids, userToken.getUid());
+        return ResponseEntity
+                .ok()
+                .build();
     }
 
-    @DeleteMapping("/{id}")
-    String delete(@PathVariable("id") String id) {
-        service.delete(id);
-        return "ok";
+    @DeleteMapping("/delete")
+    ResponseEntity<String> delete(@RequestBody List<String> ids, @RequestAttribute(USER_TOKEN) FirebaseToken userToken) {
+        service.delete(ids, userToken.getUid());
+        return ResponseEntity
+                .ok()
+                .build();
     }
 }

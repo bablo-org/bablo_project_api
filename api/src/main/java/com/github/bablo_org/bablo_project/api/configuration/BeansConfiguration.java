@@ -2,6 +2,8 @@ package com.github.bablo_org.bablo_project.api.configuration;
 
 import java.io.InputStream;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.FirestoreOptions;
@@ -13,6 +15,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 
 @Configuration
@@ -64,5 +67,11 @@ public class BeansConfiguration {
     @Bean
     FirebaseAuth firebaseAuth(FirebaseApp firebase) {
         return FirebaseAuth.getInstance(firebase);
+    }
+
+    @Bean
+    @Primary
+    public ObjectMapper jsonMapper() {
+        return new ObjectMapper().enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
     }
 }
