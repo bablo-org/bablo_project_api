@@ -5,6 +5,7 @@ import static com.google.cloud.firestore.Filter.equalTo;
 import static com.google.cloud.firestore.Filter.inArray;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 import java.util.List;
 import java.util.Map;
@@ -70,6 +71,23 @@ public class CurrencyService {
                 .forEach(ref -> batch.update(ref, Map.of("isActive", isActive)));
 
         batch.commit().get();
+    }
+
+    public Map<String, Double> getRates(String currency) {
+        Map<String, Currency> all = getAll()
+                .stream()
+                .collect(toMap(Currency::getId, c -> c));
+
+        Currency base = all.get(currency);
+        if (base == null) {
+            throw new RuntimeException("currency is not found: " + currency);
+        }
+
+        Double baseRate = base.getRate();
+        return all
+                .entrySet()
+                .stream()
+                .collect(toMap(Map.Entry::getKey, e -> e.getValue().getRate() / baseRate));
     }
 
     private Currency toModel(DocumentSnapshot doc) {
