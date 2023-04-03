@@ -2,3 +2,4 @@
 .idea
 api.iml
 api/src/main/resources/secrets.json
+api/src/main/resources/telegram-token.txt
