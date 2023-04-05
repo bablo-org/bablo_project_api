@@ -3,14 +3,19 @@ package com.github.bablo_org.bablo_project.api.service;
 import static com.github.bablo_org.bablo_project.api.model.User.ofDoc;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import com.github.bablo_org.bablo_project.api.model.Currency;
 import com.github.bablo_org.bablo_project.api.model.Settings;
 import com.github.bablo_org.bablo_project.api.model.StorageFile;
 import com.github.bablo_org.bablo_project.api.model.User;
@@ -35,6 +40,8 @@ public class UserService {
     private static final String STORAGE_BUCKET_NAME = "bablo-project.appspot.com";
 
     private static final String STORAGE_AVATARS_DIRECTORY = "avatars";
+
+    private final CurrencyService currencyService;
 
     private final Firestore firestore;
 
@@ -87,6 +94,8 @@ public class UserService {
 
     @SneakyThrows
     public void updateSettings(Settings settings, String userId) {
+        validateSettings(settings);
+
         firestore.collection(DB_COLLECTION_NAME)
                 .document(userId)
                 .update(settings.toMap())
@@ -107,6 +116,26 @@ public class UserService {
             return new StorageFile(blob.getBlobId().getName());
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private void validateSettings(Settings settings) {
+        List<String> currencyIds = settings.getFavoriteCurrencies();
+
+        if (currencyIds != null) {
+            List<String> dbCurrencyIds = currencyService.getById(currencyIds)
+                    .stream()
+                    .map(Currency::getId)
+                    .collect(toList());
+
+            Set<String> unknownCurrencies = currencyIds
+                    .stream()
+                    .filter(id -> !dbCurrencyIds.contains(id))
+                    .collect(toSet());
+
+            if (!unknownCurrencies.isEmpty()) {
+                throw new RuntimeException("unknown currencies: " + unknownCurrencies);
+            }
         }
     }
 

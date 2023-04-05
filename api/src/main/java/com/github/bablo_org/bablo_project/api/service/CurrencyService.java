@@ -13,6 +13,7 @@ import java.util.Map;
 import com.github.bablo_org.bablo_project.api.model.Currency;
 import com.github.bablo_org.bablo_project.api.model.User;
 import com.google.cloud.firestore.DocumentSnapshot;
+import com.google.cloud.firestore.FieldPath;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.WriteBatch;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,18 @@ public class CurrencyService {
     @SneakyThrows
     public List<Currency> getAll() {
         return firestore.collection(COLLECTION_NAME)
+                .get()
+                .get()
+                .getDocuments()
+                .stream()
+                .map(Currency::ofDoc)
+                .collect(toList());
+    }
+
+    @SneakyThrows
+    public List<Currency> getById(List<String> ids) {
+        return firestore.collection(COLLECTION_NAME)
+                .where(inArray(FieldPath.documentId(), ids))
                 .get()
                 .get()
                 .getDocuments()
