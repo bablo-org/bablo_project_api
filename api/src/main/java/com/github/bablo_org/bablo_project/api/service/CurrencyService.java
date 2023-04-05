@@ -1,7 +1,6 @@
 package com.github.bablo_org.bablo_project.api.service;
 
 import static com.google.cloud.firestore.FieldPath.documentId;
-import static com.google.cloud.firestore.Filter.equalTo;
 import static com.google.cloud.firestore.Filter.inArray;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -10,10 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.github.bablo_org.bablo_project.api.model.Currency;
-import com.github.bablo_org.bablo_project.api.model.User;
-import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
-import com.google.cloud.firestore.WriteBatch;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
@@ -22,11 +18,9 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class CurrencyService {
 
-    public static final String COLLECTION_NAME = "currencies";
+    private static final String COLLECTION_NAME = "currencies";
 
     private final Firestore firestore;
-
-    private final UserService userService;
 
     @SneakyThrows
     public List<Currency> getAll() {
@@ -40,36 +34,15 @@ public class CurrencyService {
     }
 
     @SneakyThrows
-    public List<Currency> getByStatus(boolean isActive) {
-        return firestore.collection(COLLECTION_NAME)
-                .where(equalTo("isActive", isActive))
+    public List<Currency> getById(List<String> ids) {
+        return firestore.collection(CurrencyService.COLLECTION_NAME)
+                .where(inArray(documentId(), ids))
                 .get()
                 .get()
                 .getDocuments()
                 .stream()
                 .map(Currency::ofDoc)
                 .collect(toList());
-    }
-
-    @SneakyThrows
-    public void changeStatus(List<String> ids, boolean isActive, String userId) {
-        User user = userService.getById(userId);
-        if (!user.isAdmin()) {
-            throw new RuntimeException("only admin users may activate/deactivate currencies");
-        }
-
-        WriteBatch batch = firestore.batch();
-
-        firestore.collection(COLLECTION_NAME)
-                .where(inArray(documentId(), ids))
-                .get()
-                .get()
-                .getDocuments()
-                .stream()
-                .map(DocumentSnapshot::getReference)
-                .forEach(ref -> batch.update(ref, Map.of("isActive", isActive)));
-
-        batch.commit().get();
     }
 
     public Map<String, Double> getRates(String currency) {
