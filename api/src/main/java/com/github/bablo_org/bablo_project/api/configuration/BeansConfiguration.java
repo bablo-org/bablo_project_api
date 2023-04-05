@@ -1,9 +1,13 @@
 package com.github.bablo_org.bablo_project.api.configuration;
 
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.bablo_org.bablo_project.api.model.telegram.TelegramToken;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.FirestoreOptions;
@@ -12,6 +16,7 @@ import com.google.cloud.storage.StorageOptions;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.auth.FirebaseAuth;
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -71,7 +76,14 @@ public class BeansConfiguration {
 
     @Bean
     @Primary
-    public ObjectMapper jsonMapper() {
+    ObjectMapper jsonMapper() {
         return new ObjectMapper().enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
+    }
+
+    @Bean
+    @SneakyThrows
+    TelegramToken telegramToken() {
+        Path path = Paths.get(getClass().getClassLoader().getResource("telegram-token.txt").toURI());
+        return new TelegramToken(Files.readString(path));
     }
 }
