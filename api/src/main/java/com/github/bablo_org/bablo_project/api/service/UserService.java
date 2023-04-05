@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.StreamSupport;
 
+import com.github.bablo_org.bablo_project.api.model.Settings;
 import com.github.bablo_org.bablo_project.api.model.StorageFile;
 import com.github.bablo_org.bablo_project.api.model.User;
 import com.google.cloud.firestore.DocumentReference;
@@ -57,15 +58,15 @@ public class UserService {
     }
 
     @SneakyThrows
-    public User updateCurrentProfile(String name, String avatar, String callerId) {
-        DocumentReference ref = getRefById(callerId);
+    public User updateCurrentProfile(String name, String avatar, String userId) {
+        DocumentReference ref = getRefById(userId);
         DocumentSnapshot doc = ref.get().get();
         if (!doc.exists()) {
             throw new RuntimeException("User with such id does note exist");
         }
 
         User user = ofDoc(doc);
-        validateUpdateProfile(user, callerId);
+        validateUpdateProfile(user, userId);
 
         Map<String, Object> fields = new HashMap<>();
         if (name != null) {
@@ -82,6 +83,14 @@ public class UserService {
         }
 
         return user;
+    }
+
+    @SneakyThrows
+    public void updateSettings(Settings settings, String userId) {
+        firestore.collection(DB_COLLECTION_NAME)
+                .document(userId)
+                .update(settings.toMap())
+                .get();
     }
 
     public StorageFile uploadAvatar(String fileName, byte[] content, String user) {

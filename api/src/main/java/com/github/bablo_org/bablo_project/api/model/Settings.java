@@ -30,4 +30,11 @@ public class Settings {
                 (Boolean) settings.get("enableTelegramNotifications")
         );
     }
+
+    public Map<String, Object> toMap() {
+        return Map.of(
+                "favoriteCurrencies", favoriteCurrencies,
+                "enableTelegramNotifications", enableTelegramNotifications
+        );
+    }
 }
