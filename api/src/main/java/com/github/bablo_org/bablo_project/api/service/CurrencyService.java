@@ -24,7 +24,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class CurrencyService {
 
-    private static final String COLLECTION_NAME = "currencies";
+    public static final String COLLECTION_NAME = "currencies";
 
     private final Firestore firestore;
 

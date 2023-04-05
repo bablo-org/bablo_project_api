@@ -1,6 +1,7 @@
 package com.github.bablo_org.bablo_project.api.service;
 
 import static com.github.bablo_org.bablo_project.api.model.User.ofDoc;
+import static com.google.cloud.firestore.Filter.inArray;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
@@ -8,19 +9,17 @@ import static java.util.stream.Collectors.toSet;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import com.github.bablo_org.bablo_project.api.model.Currency;
 import com.github.bablo_org.bablo_project.api.model.Settings;
 import com.github.bablo_org.bablo_project.api.model.StorageFile;
 import com.github.bablo_org.bablo_project.api.model.User;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
+import com.google.cloud.firestore.FieldPath;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobInfo;
@@ -40,8 +39,6 @@ public class UserService {
     private static final String STORAGE_BUCKET_NAME = "bablo-project.appspot.com";
 
     private static final String STORAGE_AVATARS_DIRECTORY = "avatars";
-
-    private final CurrencyService currencyService;
 
     private final Firestore firestore;
 
@@ -119,13 +116,18 @@ public class UserService {
         }
     }
 
+    @SneakyThrows
     private void validateSettings(Settings settings) {
         List<String> currencyIds = settings.getFavoriteCurrencies();
 
         if (currencyIds != null) {
-            List<String> dbCurrencyIds = currencyService.getById(currencyIds)
+            List<String> dbCurrencyIds = firestore.collection(CurrencyService.COLLECTION_NAME)
+                    .where(inArray(FieldPath.documentId(), currencyIds))
+                    .get()
+                    .get()
+                    .getDocuments()
                     .stream()
-                    .map(Currency::getId)
+                    .map(DocumentSnapshot::getId)
                     .collect(toList());
 
             Set<String> unknownCurrencies = currencyIds
