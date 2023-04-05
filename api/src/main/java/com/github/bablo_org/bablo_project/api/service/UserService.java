@@ -1,7 +1,7 @@
 package com.github.bablo_org.bablo_project.api.service;
 
+import static com.github.bablo_org.bablo_project.api.model.User.ofDoc;
 import static java.util.Comparator.comparing;
-import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 
 import java.io.ByteArrayInputStream;
@@ -41,41 +41,41 @@ public class UserService {
 
     @SneakyThrows
     public List<User> getAll() {
-        return firestore.collection("users")
+        return firestore.collection(DB_COLLECTION_NAME)
                 .get()
                 .get()
                 .getDocuments()
                 .stream()
-                .map(doc -> new User(
-                        doc.getId(),
-                        doc.getString("name"),
-                        doc.getString("email"),
-                        doc.getString("avatar"),
-                        doc.getDate("created")
-                ))
+                .map(User::ofDoc)
                 .collect(toList());
     }
 
     @SneakyThrows
-    public User updateCurrentProfile(User update, String callerId) {
+    public User getById(String id) {
+        DocumentReference ref = getRefById(id);
+        return ofDoc(ref.get().get());
+    }
+
+    @SneakyThrows
+    public User updateCurrentProfile(String name, String avatar, String callerId) {
         DocumentReference ref = getRefById(callerId);
         DocumentSnapshot doc = ref.get().get();
         if (!doc.exists()) {
             throw new RuntimeException("User with such id does note exist");
         }
 
-        User user = toModel(doc);
+        User user = ofDoc(doc);
         validateUpdateProfile(user, callerId);
-        if (update.getName() != null) {
-            user.setName(update.getName());
-        }
-        if (update.getAvatar() != null) {
-            user.setAvatar(update.getAvatar());
-        }
 
         Map<String, Object> fields = new HashMap<>();
-        ofNullable(update.getAvatar()).ifPresent(v -> fields.put("avatar", v));
-        ofNullable(update.getName()).ifPresent(v -> fields.put("name", v));
+        if (name != null) {
+            user.setName(name);
+            fields.put("name", name);
+        }
+        if (avatar != null) {
+            user.setAvatar(avatar);
+            fields.put("avatar", avatar);
+        }
 
         if (!fields.isEmpty()) {
             ref.update(fields).get();
@@ -118,16 +118,6 @@ public class UserService {
         return firestore
                 .collection(DB_COLLECTION_NAME)
                 .document(id);
-    }
-
-    private User toModel(DocumentSnapshot doc) {
-        return new User(
-                doc.getId(),
-                doc.getString("name"),
-                doc.getString("email"),
-                doc.getString("avatar"),
-                doc.getDate("created")
-        );
     }
 
     private void validateUpdateProfile(User user, String callerId) {

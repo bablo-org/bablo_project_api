@@ -2,6 +2,7 @@ package com.github.bablo_org.bablo_project.api.model;
 
 import java.util.Date;
 
+import com.google.cloud.firestore.DocumentSnapshot;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,4 +21,19 @@ public class Transaction {
     private TransactionStatus status;
     private Date created;
     private Date updated;
+
+    public static Transaction ofDoc(DocumentSnapshot doc) {
+        return new Transaction(
+                doc.getId(),
+                doc.getString("sender"),
+                doc.getString("receiver"),
+                doc.getString("currency"),
+                doc.getDouble("amount"),
+                doc.getString("description"),
+                doc.getDate("date"),
+                TransactionStatus.valueOf(doc.getString("status")),
+                doc.getDate("created"),
+                doc.getDate("updated")
+        );
+    }
 }

@@ -1,9 +1,10 @@
 package com.github.bablo_org.bablo_project.api.model;
 
-public enum TransactionStatus {
+public enum SquashStatus {
     NEW,
     PENDING,
     APPROVED,
     DECLINED,
-    COMPLETED;
+    OUTDATED,
+    COMPLETED,
 }
