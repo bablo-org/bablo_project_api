@@ -1,7 +1,7 @@
 package com.github.bablo_org.bablo_project.api.service;
 
+import static com.github.bablo_org.bablo_project.api.model.User.ofDoc;
 import static java.util.Comparator.comparing;
-import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 
 import java.io.ByteArrayInputStream;
@@ -46,14 +46,14 @@ public class UserService {
                 .get()
                 .getDocuments()
                 .stream()
-                .map(this::toModel)
+                .map(User::ofDoc)
                 .collect(toList());
     }
 
     @SneakyThrows
     public User getById(String id) {
         DocumentReference ref = getRefById(id);
-        return toModel(ref.get().get());
+        return ofDoc(ref.get().get());
     }
 
     @SneakyThrows
@@ -64,7 +64,7 @@ public class UserService {
             throw new RuntimeException("User with such id does note exist");
         }
 
-        User user = toModel(doc);
+        User user = ofDoc(doc);
         validateUpdateProfile(user, callerId);
 
         Map<String, Object> fields = new HashMap<>();
@@ -118,17 +118,6 @@ public class UserService {
         return firestore
                 .collection(DB_COLLECTION_NAME)
                 .document(id);
-    }
-
-    private User toModel(DocumentSnapshot doc) {
-        return new User(
-                doc.getId(),
-                doc.getString("name"),
-                doc.getString("email"),
-                doc.getString("avatar"),
-                doc.getDate("created"),
-                ofNullable(doc.getBoolean("isAdmin")).orElse(false)
-        );
     }
 
     private void validateUpdateProfile(User user, String callerId) {

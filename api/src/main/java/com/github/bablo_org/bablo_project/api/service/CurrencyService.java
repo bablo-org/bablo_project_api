@@ -36,7 +36,7 @@ public class CurrencyService {
                 .get()
                 .getDocuments()
                 .stream()
-                .map(this::toModel)
+                .map(Currency::ofDoc)
                 .collect(toList());
     }
 
@@ -48,7 +48,7 @@ public class CurrencyService {
                 .get()
                 .getDocuments()
                 .stream()
-                .map(this::toModel)
+                .map(Currency::ofDoc)
                 .collect(toList());
     }
 
@@ -88,16 +88,5 @@ public class CurrencyService {
                 .entrySet()
                 .stream()
                 .collect(toMap(Map.Entry::getKey, e -> e.getValue().getRate() / baseRate));
-    }
-
-    private Currency toModel(DocumentSnapshot doc) {
-        return new Currency(
-                doc.getId(),
-                doc.getString("name"),
-                doc.getString("symbol"),
-                ofNullable(doc.getBoolean("isActive")).orElse(true),
-                doc.getDouble("rate"),
-                doc.getDate("updated")
-        );
     }
 }

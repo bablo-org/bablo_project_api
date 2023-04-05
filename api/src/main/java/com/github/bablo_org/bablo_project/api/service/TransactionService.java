@@ -72,7 +72,7 @@ public class TransactionService {
                 .get()
                 .getDocuments()
                 .stream()
-                .map(this::toModel)
+                .map(Transaction::ofDoc)
                 .collect(toList());
     }
 
@@ -94,7 +94,7 @@ public class TransactionService {
         List<DocumentSnapshot> documents = getByIds(ids);
 
         for (DocumentSnapshot document : documents) {
-            Transaction transaction = toModel(document);
+            Transaction transaction = Transaction.ofDoc(document);
             validateApprove(transaction, user);
         }
 
@@ -115,7 +115,7 @@ public class TransactionService {
         List<DocumentSnapshot> documents = getByIds(ids);
 
         for (DocumentSnapshot document : documents) {
-            Transaction transaction = toModel(document);
+            Transaction transaction = Transaction.ofDoc(document);
             validateDecline(transaction, user);
         }
 
@@ -136,7 +136,7 @@ public class TransactionService {
         List<DocumentSnapshot> documents = getByIds(ids);
 
         for (DocumentSnapshot document : documents) {
-            Transaction transaction = toModel(document);
+            Transaction transaction = Transaction.ofDoc(document);
             validateComplete(transaction, user);
         }
 
@@ -277,22 +277,7 @@ public class TransactionService {
     @SneakyThrows
     private Transaction toModel(DocumentReference ref) {
         DocumentSnapshot doc = ref.get().get();
-        return doc == null ? null : toModel(doc);
-    }
-
-    private Transaction toModel(DocumentSnapshot doc) {
-        return new Transaction(
-                doc.getId(),
-                doc.getString("sender"),
-                doc.getString("receiver"),
-                doc.getString("currency"),
-                doc.getDouble("amount"),
-                doc.getString("description"),
-                doc.getDate("date"),
-                TransactionStatus.valueOf(doc.getString("status")),
-                doc.getDate("created"),
-                doc.getDate("updated")
-        );
+        return doc == null ? null : Transaction.ofDoc(doc);
     }
 
     private Map<String, Object> toMap(Transaction transaction) {
