@@ -3,14 +3,18 @@ package com.github.bablo_org.bablo_project.api.service;
 import static com.github.bablo_org.bablo_project.api.model.User.ofDoc;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.StreamSupport;
 
+import com.github.bablo_org.bablo_project.api.model.Currency;
+import com.github.bablo_org.bablo_project.api.model.Settings;
 import com.github.bablo_org.bablo_project.api.model.StorageFile;
 import com.github.bablo_org.bablo_project.api.model.User;
 import com.google.cloud.firestore.DocumentReference;
@@ -39,6 +43,8 @@ public class UserService {
 
     private final Storage cloudStorage;
 
+    private CurrencyService currencyService;
+
     @SneakyThrows
     public List<User> getAll() {
         return firestore.collection(DB_COLLECTION_NAME)
@@ -57,15 +63,15 @@ public class UserService {
     }
 
     @SneakyThrows
-    public User updateCurrentProfile(String name, String avatar, String callerId) {
-        DocumentReference ref = getRefById(callerId);
+    public User updateCurrentProfile(String name, String avatar, String userId) {
+        DocumentReference ref = getRefById(userId);
         DocumentSnapshot doc = ref.get().get();
         if (!doc.exists()) {
             throw new RuntimeException("User with such id does note exist");
         }
 
         User user = ofDoc(doc);
-        validateUpdateProfile(user, callerId);
+        validateUpdateProfile(user, userId);
 
         Map<String, Object> fields = new HashMap<>();
         if (name != null) {
@@ -84,6 +90,16 @@ public class UserService {
         return user;
     }
 
+    @SneakyThrows
+    public void updateSettings(Settings settings, String userId) {
+        validateSettings(settings);
+
+        firestore.collection(DB_COLLECTION_NAME)
+                .document(userId)
+                .update(settings.toMap())
+                .get();
+    }
+
     public StorageFile uploadAvatar(String fileName, byte[] content, String user) {
         String personalizedFileName = user + "-" + fileName; // 2+ users may upload avatar with the same name
         String filePath = STORAGE_AVATARS_DIRECTORY + "/" + personalizedFileName;
@@ -98,6 +114,27 @@ public class UserService {
             return new StorageFile(blob.getBlobId().getName());
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    @SneakyThrows
+    private void validateSettings(Settings settings) {
+        List<String> currencyIds = settings.getFavoriteCurrencies();
+
+        if (currencyIds != null) {
+            List<String> dbCurrencyIds = currencyService.getById(currencyIds)
+                    .stream()
+                    .map(Currency::getId)
+                    .collect(toList());
+
+            Set<String> unknownCurrencies = currencyIds
+                    .stream()
+                    .filter(id -> !dbCurrencyIds.contains(id))
+                    .collect(toSet());
+
+            if (!unknownCurrencies.isEmpty()) {
+                throw new RuntimeException("unknown currencies: " + unknownCurrencies);
+            }
         }
     }
 

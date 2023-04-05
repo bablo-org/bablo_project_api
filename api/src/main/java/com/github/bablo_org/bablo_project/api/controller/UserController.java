@@ -5,6 +5,7 @@ import static com.github.bablo_org.bablo_project.api.Constants.USER_TOKEN;
 import java.util.Base64;
 import java.util.List;
 
+import com.github.bablo_org.bablo_project.api.model.Settings;
 import com.github.bablo_org.bablo_project.api.model.StorageFile;
 import com.github.bablo_org.bablo_project.api.model.UpdateUserProfileRequest;
 import com.github.bablo_org.bablo_project.api.model.User;
@@ -12,6 +13,7 @@ import com.github.bablo_org.bablo_project.api.service.UserService;
 import com.google.firebase.auth.FirebaseToken;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -38,6 +40,14 @@ public class UserController extends BaseController {
     @PutMapping("/updateProfile")
     User updateProfile(@RequestBody UpdateUserProfileRequest request, @RequestAttribute(USER_TOKEN) FirebaseToken userToken) {
         return service.updateCurrentProfile(request.getName(), request.getAvatar(), userToken.getUid());
+    }
+
+    @PutMapping("/updateSettings")
+    ResponseEntity<String> updateSettings(@RequestBody Settings settings, @RequestAttribute(USER_TOKEN) FirebaseToken userToken) {
+        service.updateSettings(settings, userToken.getUid());
+        return ResponseEntity
+                .ok()
+                .build();
     }
 
     @PostMapping(value = "/uploadAvatar")
