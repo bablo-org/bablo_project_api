@@ -2,14 +2,19 @@ package com.github.bablo_org.bablo_project.api.service;
 
 import static com.google.cloud.firestore.FieldPath.documentId;
 import static com.google.cloud.firestore.Filter.inArray;
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.github.bablo_org.bablo_project.api.model.Currency;
+import com.github.bablo_org.bablo_project.api.model.Transaction;
+import com.google.cloud.firestore.CollectionReference;
 import com.google.cloud.firestore.Firestore;
+import com.google.cloud.firestore.WriteBatch;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
@@ -21,6 +26,18 @@ public class CurrencyService {
     private static final String COLLECTION_NAME = "currencies";
 
     private final Firestore firestore;
+
+//    @SneakyThrows
+//    public void add(List<Currency> currencies) {
+//        WriteBatch batch = firestore.batch();
+//        CollectionReference collection = firestore.collection(COLLECTION_NAME);
+//
+//        currencies.forEach(t -> {
+//            batch.set(collection.document(), toMap(t));
+//        });
+//
+//        batch.commit().get();
+//    }
 
     @SneakyThrows
     public List<Currency> getAll() {
@@ -61,4 +78,16 @@ public class CurrencyService {
                 .stream()
                 .collect(toMap(Map.Entry::getKey, e -> e.getValue().getRate() / baseRate));
     }
+
+//    private Map<String, Object> toMap(Currency currency) {
+//        Map<String, Object> map = new HashMap<>();
+//
+//        ofNullable(currency.getId()).ifPresent(v -> map.put("id", v));
+//        ofNullable(currency.getName()).ifPresent(v -> map.put("name", v));
+//        ofNullable(currency.getSymbol()).ifPresent(v -> map.put("symbol", v));
+//        ofNullable(currency.getRate()).ifPresent(v -> map.put("rate", v));
+//        ofNullable(currency.getUpdated()).ifPresent(v -> map.put("updated", v));
+//
+//        return map;
+//    }
 }
