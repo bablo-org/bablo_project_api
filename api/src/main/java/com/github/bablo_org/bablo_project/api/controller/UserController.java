@@ -38,8 +38,11 @@ public class UserController extends BaseController {
     }
 
     @PutMapping("/updateProfile")
-    User updateProfile(@RequestBody UpdateUserProfileRequest request, @RequestAttribute(USER_TOKEN) FirebaseToken userToken) {
-        return service.updateCurrentProfile(request.getName(), request.getAvatar(), userToken.getUid());
+    ResponseEntity<String> updateProfile(@RequestBody UpdateUserProfileRequest request, @RequestAttribute(USER_TOKEN) FirebaseToken userToken) {
+        service.updateCurrentProfile(request, userToken.getUid());
+        return ResponseEntity
+                .ok()
+                .build();
     }
 
     @PutMapping("/updateSettings")

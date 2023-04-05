@@ -7,18 +7,16 @@ import static java.util.stream.Collectors.toSet;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.StreamSupport;
 
 import com.github.bablo_org.bablo_project.api.model.Currency;
 import com.github.bablo_org.bablo_project.api.model.Settings;
 import com.github.bablo_org.bablo_project.api.model.StorageFile;
+import com.github.bablo_org.bablo_project.api.model.UpdateUserProfileRequest;
 import com.github.bablo_org.bablo_project.api.model.User;
 import com.google.cloud.firestore.DocumentReference;
-import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobInfo;
@@ -63,31 +61,10 @@ public class UserService {
     }
 
     @SneakyThrows
-    public User updateCurrentProfile(String name, String avatar, String userId) {
-        DocumentReference ref = getRefById(userId);
-        DocumentSnapshot doc = ref.get().get();
-        if (!doc.exists()) {
-            throw new RuntimeException("User with such id does note exist");
-        }
-
-        User user = ofDoc(doc);
-        validateUpdateProfile(user, userId);
-
-        Map<String, Object> fields = new HashMap<>();
-        if (name != null) {
-            user.setName(name);
-            fields.put("name", name);
-        }
-        if (avatar != null) {
-            user.setAvatar(avatar);
-            fields.put("avatar", avatar);
-        }
-
-        if (!fields.isEmpty()) {
-            ref.update(fields).get();
-        }
-
-        return user;
+    public void updateCurrentProfile(UpdateUserProfileRequest profile, String userId) {
+        getRefById(userId)
+                .update(profile.toMap())
+                .get();
     }
 
     @SneakyThrows
