@@ -17,6 +17,7 @@ public class User {
     private String name;
     private String email;
     private String avatar;
+    private String telegramId;
     private Date created;
     private boolean isAdmin;
     private Settings settings;
@@ -27,6 +28,7 @@ public class User {
                 doc.getString("name"),
                 doc.getString("email"),
                 doc.getString("avatar"),
+                doc.getString("telegramId"),
                 doc.getDate("created"),
                 ofNullable(doc.getBoolean("isAdmin")).orElse(false),
                 Settings.ofDoc(doc)
