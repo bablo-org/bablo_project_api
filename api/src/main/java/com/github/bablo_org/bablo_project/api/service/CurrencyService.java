@@ -27,17 +27,17 @@ public class CurrencyService {
 
     private final Firestore firestore;
 
-//    @SneakyThrows
-//    public void add(List<Currency> currencies) {
-//        WriteBatch batch = firestore.batch();
-//        CollectionReference collection = firestore.collection(COLLECTION_NAME);
-//
-//        currencies.forEach(t -> {
-//            batch.set(collection.document(), toMap(t));
-//        });
-//
-//        batch.commit().get();
-//    }
+    @SneakyThrows
+    public void add(List<Currency> currencies) {
+        WriteBatch batch = firestore.batch();
+        CollectionReference collection = firestore.collection(COLLECTION_NAME);
+
+        currencies.forEach(t -> {
+            batch.set(collection.document(), t.toMap());
+        });
+
+        batch.commit().get();
+    }
 
     @SneakyThrows
     public List<Currency> getAll() {
@@ -79,15 +79,4 @@ public class CurrencyService {
                 .collect(toMap(Map.Entry::getKey, e -> e.getValue().getRate() / baseRate));
     }
 
-//    private Map<String, Object> toMap(Currency currency) {
-//        Map<String, Object> map = new HashMap<>();
-//
-//        ofNullable(currency.getId()).ifPresent(v -> map.put("id", v));
-//        ofNullable(currency.getName()).ifPresent(v -> map.put("name", v));
-//        ofNullable(currency.getSymbol()).ifPresent(v -> map.put("symbol", v));
-//        ofNullable(currency.getRate()).ifPresent(v -> map.put("rate", v));
-//        ofNullable(currency.getUpdated()).ifPresent(v -> map.put("updated", v));
-//
-//        return map;
-//    }
 }
