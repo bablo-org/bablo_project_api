@@ -33,7 +33,7 @@ public class CurrencyService {
         CollectionReference collection = firestore.collection(COLLECTION_NAME);
 
         currencies.forEach(t -> {
-            batch.set(collection.document(), t.toMap());
+            batch.set(collection.document(t.getId()), t.toMap());
         });
 
         batch.commit().get();
