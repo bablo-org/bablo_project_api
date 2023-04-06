@@ -1,9 +1,8 @@
 package com.github.bablo_org.bablo_project.api.configuration;
 
+import java.io.BufferedReader;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.InputStreamReader;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -83,7 +82,9 @@ public class BeansConfiguration {
     @Bean
     @SneakyThrows
     TelegramToken telegramToken() {
-        Path path = Paths.get(getClass().getClassLoader().getResource("telegram-token.txt").toURI());
-        return new TelegramToken(Files.readString(path));
+        InputStream is = getClass().getClassLoader().getResourceAsStream("telegram-token.txt");
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(is))){
+            return new TelegramToken(br.readLine());
+        }
     }
 }
