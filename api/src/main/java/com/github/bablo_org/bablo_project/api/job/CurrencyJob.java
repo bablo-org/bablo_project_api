@@ -42,28 +42,9 @@ public class CurrencyJob {
             JsonElement rate = jsonObjectRates.get(value);
             Currency currency = new Currency(value, "", "", rate.getAsDouble(), now);
             currenciesList.add(currency);
-            System.out.println("");
-
-            int tmp = 1;
-            if (tmp==2){
-                break;
-            }
-
         }
 
         service.add(currenciesList);
-        System.out.println("");
-//        CurrencyExternal[] currencies = mapper.readValue(jsonString, CurrencyExternal[].class);
-//        jsonElement.
-//        System.out.println(jsonObject);
 
-
-
-
-//        Date now = new Date();
-//        Currency currency = new Currency("ALL", "Albanian lek", "", 103.9181, now);
-//
-//        service.add(Collections.singletonList(currency));
-//        System.out.println("finish");
     }
 }
