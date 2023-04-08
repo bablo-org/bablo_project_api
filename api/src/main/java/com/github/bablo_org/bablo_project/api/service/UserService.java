@@ -17,6 +17,7 @@ import com.github.bablo_org.bablo_project.api.model.StorageFile;
 import com.github.bablo_org.bablo_project.api.model.UpdateUserProfileRequest;
 import com.github.bablo_org.bablo_project.api.model.User;
 import com.google.cloud.firestore.DocumentReference;
+import com.google.cloud.firestore.FieldPath;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobInfo;
@@ -41,7 +42,9 @@ public class UserService {
 
     private final Storage cloudStorage;
 
-    private CurrencyService currencyService;
+    private final CurrencyService currencyService;
+
+    private final TelegramService telegramService;
 
     @SneakyThrows
     public List<User> getAll() {
@@ -92,6 +95,18 @@ public class UserService {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @SneakyThrows
+    public void connectTelegram(String tgUsername, String userId) {
+        String tgId = telegramService.resolveId(tgUsername);
+        firestore.collection(DB_COLLECTION_NAME)
+                .document(userId)
+                .update(
+                        FieldPath.of("telegramId"), tgId,
+                        FieldPath.of("settings/enableTelegramNotifications"), true
+                )
+                .get();
     }
 
     @SneakyThrows

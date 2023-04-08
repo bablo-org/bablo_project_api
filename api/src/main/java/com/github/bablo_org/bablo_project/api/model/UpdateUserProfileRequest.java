@@ -9,7 +9,6 @@ import lombok.Data;
 public class UpdateUserProfileRequest {
     private String name;
     private String avatar;
-    private String telegramId;
 
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
@@ -18,9 +17,6 @@ public class UpdateUserProfileRequest {
         }
         if (avatar != null) {
             map.put("avatar", avatar);
-        }
-        if (telegramId != null) {
-            map.put("telegramId", telegramId);
         }
         return map;
     }
