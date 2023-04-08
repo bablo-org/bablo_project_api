@@ -3,9 +3,11 @@ package com.github.bablo_org.bablo_project.api.service;
 import static java.util.Arrays.asList;
 
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 
@@ -60,7 +62,7 @@ public class TelegramService {
 
     @SneakyThrows
     public void sendMessage(String message, String userId) {
-        String uri = String.format(SEND_MESSAGE_TEMPLATE, token.getToken(), userId, message);
+        String uri = String.format(SEND_MESSAGE_TEMPLATE, token.getToken(), userId, URLEncoder.encode(message, StandardCharsets.UTF_8));
         HttpRequest request = HttpRequest.newBuilder(URI.create(uri))
                 .POST(HttpRequest.BodyPublishers.noBody())
                 .build();
