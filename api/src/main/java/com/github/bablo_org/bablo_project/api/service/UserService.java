@@ -104,7 +104,7 @@ public class UserService {
                 .document(userId)
                 .update(
                         FieldPath.of("telegramId"), tgId,
-                        FieldPath.of("settings/enableTelegramNotifications"), true
+                        FieldPath.of("settings", "enableTelegramNotifications"), true
                 )
                 .get();
     }
