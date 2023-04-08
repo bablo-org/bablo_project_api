@@ -29,8 +29,10 @@ import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.WriteBatch;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TransactionService {
@@ -94,7 +96,11 @@ public class TransactionService {
         });
         batch.commit().get();
 
-        sendNotifications(transactions, user);
+        try {
+            sendNotifications(transactions, user);
+        } catch (Exception e) {
+            log.error("failed to send telegram notifications", e);
+        }
     }
 
     private void sendNotifications(List<Transaction> allTransactions, String userId) {
