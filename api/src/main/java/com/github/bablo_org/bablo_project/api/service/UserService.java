@@ -76,7 +76,7 @@ public class UserService {
 
         firestore.collection(DB_COLLECTION_NAME)
                 .document(userId)
-                .update(settings.toMap())
+                .update("settings", settings.toMap())
                 .get();
     }
 
