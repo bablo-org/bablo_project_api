@@ -111,9 +111,12 @@ public class TransactionService {
 
         byPartner.forEach((partnerId, transactions) -> {
             User partner = allUsers.get(partnerId);
+            User initiator = allUsers.get(userId);
             Settings settings = partner.getSettings();
             if (settings.isEnableTelegramNotifications()) {
-                telegramService.sendMessage("You have " + transactions.size() + " new or updated transactions from " + userId, partner.getTelegramId());
+                telegramService.sendMessage(
+                        "You have " + transactions.size() + " new or updated transactions from " + initiator.getName(),
+                        partner.getTelegramId());
             }
         });
     }
