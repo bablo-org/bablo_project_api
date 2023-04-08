@@ -6,7 +6,6 @@ import static java.util.stream.Collectors.toList;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import com.github.bablo_org.bablo_project.api.model.SquashData;
 import com.github.bablo_org.bablo_project.api.model.Transaction;
@@ -24,11 +23,7 @@ public class SquashService {
     public List<SquashData> generate(String user, String currency) {
         List<Transaction> transactions = transactionService.getByUser(user, List.of(PENDING.name(), APPROVED.name()));
 
-        Map<String, List<Transaction>> groupByPartner = transactions
-                .stream()
-                .collect(Collectors.groupingBy(
-                        tx -> tx.getSender().equals(user) ? tx.getReceiver() : tx.getSender())
-                );
+        Map<String, List<Transaction>> groupByPartner = transactionService.groupByPartner(transactions, user);
         Map<String, Double> rates = currencyService.getRates(currency);
 
         return groupByPartner.entrySet()
