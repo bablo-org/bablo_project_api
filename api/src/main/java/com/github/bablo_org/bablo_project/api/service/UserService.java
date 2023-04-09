@@ -74,10 +74,33 @@ public class UserService {
     public void updateSettings(Settings settings, String userId) {
         validateSettings(settings);
 
-        firestore.collection(DB_COLLECTION_NAME)
-                .document(userId)
-                .update("settings", settings.toMap())
-                .get();
+        if (settings.getEnableTelegramNotifications() != null && settings.getFavoriteCurrencies() != null) {
+            firestore.collection(DB_COLLECTION_NAME)
+                    .document(userId)
+                    .update(
+                            FieldPath.of("settings", "enableTelegramNotifications"), settings.getEnableTelegramNotifications(),
+                            FieldPath.of("settings", "favoriteCurrencies"), settings.getFavoriteCurrencies()
+                    )
+                    .get();
+        }
+
+        if (settings.getEnableTelegramNotifications() != null) {
+            firestore.collection(DB_COLLECTION_NAME)
+                    .document(userId)
+                    .update(
+                            FieldPath.of("settings", "enableTelegramNotifications"), settings.getEnableTelegramNotifications()
+                    )
+                    .get();
+        }
+
+        if (settings.getFavoriteCurrencies() != null) {
+            firestore.collection(DB_COLLECTION_NAME)
+                    .document(userId)
+                    .update(
+                            FieldPath.of("settings", "favoriteCurrencies"), settings.getFavoriteCurrencies()
+                    )
+                    .get();
+        }
     }
 
     public StorageFile uploadAvatar(String fileName, byte[] content, String user) {

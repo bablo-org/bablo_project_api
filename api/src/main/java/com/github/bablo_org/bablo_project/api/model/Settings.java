@@ -1,7 +1,9 @@
 package com.github.bablo_org.bablo_project.api.model;
 
 import static java.util.Collections.emptyList;
+import static java.util.Optional.ofNullable;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -15,7 +17,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Settings {
     private List<String> favoriteCurrencies;
-    private boolean enableTelegramNotifications;
+    private Boolean enableTelegramNotifications;
 
     /** setting is a field of 'user' document */
     public static Settings ofDoc(DocumentSnapshot doc) {
@@ -32,9 +34,11 @@ public class Settings {
     }
 
     public Map<String, Object> toMap() {
-        return Map.of(
-                "favoriteCurrencies", favoriteCurrencies,
-                "enableTelegramNotifications", enableTelegramNotifications
-        );
+        Map<String, Object> map = new HashMap<>();
+
+        ofNullable(favoriteCurrencies).ifPresent(v -> map.put("favoriteCurrencies", favoriteCurrencies));
+        ofNullable(enableTelegramNotifications).ifPresent(v -> map.put("enableTelegramNotifications", enableTelegramNotifications));
+
+        return map;
     }
 }

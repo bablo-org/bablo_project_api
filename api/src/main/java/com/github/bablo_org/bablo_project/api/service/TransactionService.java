@@ -13,7 +13,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.github.bablo_org.bablo_project.api.model.Settings;
@@ -113,7 +112,7 @@ public class TransactionService {
             User partner = allUsers.get(partnerId);
             User initiator = allUsers.get(userId);
             Settings settings = partner.getSettings();
-            if (settings.isEnableTelegramNotifications()) {
+            if (settings.getEnableTelegramNotifications()) {
                 telegramService.sendMessage(
                         "You have " + transactions.size() + " new or updated transactions from " + initiator.getName(),
                         partner.getTelegramId());
