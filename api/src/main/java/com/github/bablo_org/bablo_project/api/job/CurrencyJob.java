@@ -25,11 +25,13 @@ import java.util.stream.Stream;
 @Component
 public class CurrencyJob {
 
-    private final Firestore firestore;
+    private static final String CONVERSION_RATES = "conversion_rates";
 
     private final CurrencyService service;
 
     private final ObjectMapper mapper;
+
+    private final CurrencyApi api;
 
     @SneakyThrows
     public void run(){
@@ -84,5 +86,13 @@ public class CurrencyJob {
                 e -> System.out.println(e.getKey() + " : " + e.getValue().asText()));
                 System.out.println("hello");
     }
-
+    @SneakyThrows
+    public void run3(){
+        JsonNode root = mapper.readTree(api.getRates());
+        List<CurrencyExternal> currenciesList = new ArrayList<CurrencyExternal>();
+        Date now = new Date();
+        root.get(CONVERSION_RATES).fields().forEachRemaining(
+                e -> currenciesList.add(new CurrencyExternal(e.getKey(), e.getValue().asDouble(), now )));
+        service.updateRates(currenciesList);
+    }
 }
