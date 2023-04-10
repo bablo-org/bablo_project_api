@@ -1,8 +1,10 @@
 package com.github.bablo_org.bablo_project.api.job;
 
+import com.github.bablo_org.bablo_project.api.model.currencyExternal.ExchangeRatesToken;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Component;
 
@@ -12,15 +14,18 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 @Component
+@RequiredArgsConstructor
 public class CurrencyApi {
 
-    private static final String URL_STRING = "https://v6.exchangerate-api.com/v6/ee38339f5db785019960d1dd/latest/USD";
+    private static final String URL_STRING = "https://v6.exchangerate-api.com/v6/%s/latest/USD";
+
+    private final ExchangeRatesToken token;
 
     @SneakyThrows
     public String getRates(){
 
 // Making Request
-        URL url = new URL(URL_STRING);
+        URL url = new URL(String.format(URL_STRING, token.getToken()));
         HttpURLConnection request = (HttpURLConnection) url.openConnection();
         request.connect();
 
