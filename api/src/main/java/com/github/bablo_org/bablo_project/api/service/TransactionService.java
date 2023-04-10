@@ -6,13 +6,16 @@ import static com.google.cloud.firestore.Filter.equalTo;
 import static com.google.cloud.firestore.Filter.inArray;
 import static com.google.cloud.firestore.Filter.or;
 import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import com.github.bablo_org.bablo_project.api.model.Settings;
 import com.github.bablo_org.bablo_project.api.model.Transaction;
 import com.github.bablo_org.bablo_project.api.model.TransactionStatus;
 import com.github.bablo_org.bablo_project.api.model.User;
@@ -25,8 +28,10 @@ import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.WriteBatch;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TransactionService {
@@ -36,6 +41,8 @@ public class TransactionService {
     private final Firestore firestore;
 
     private final UserService userService;
+
+    private final TelegramService telegramService;
 
     public Transaction getById(String id, String user) {
         Transaction transaction = toModel(getRefById(id));
@@ -87,6 +94,30 @@ public class TransactionService {
             batch.set(collection.document(), toMap(t));
         });
         batch.commit().get();
+
+        try {
+            sendNotifications(transactions, user);
+        } catch (Exception e) {
+            log.error("failed to send telegram notifications", e);
+        }
+    }
+
+    private void sendNotifications(List<Transaction> allTransactions, String userId) {
+        Map<String, List<Transaction>> byPartner = groupByPartner(allTransactions, userId);
+        Map<String, User> allUsers = userService.getAll()
+                .stream()
+                .collect(Collectors.toMap(User::getId, u -> u));
+
+        byPartner.forEach((partnerId, transactions) -> {
+            User partner = allUsers.get(partnerId);
+            User initiator = allUsers.get(userId);
+            Settings settings = partner.getSettings();
+            if (settings.getEnableTelegramNotifications()) {
+                telegramService.sendMessage(
+                        "You have " + transactions.size() + " new or updated transactions from " + initiator.getName(),
+                        partner.getTelegramId());
+            }
+        });
     }
 
     @SneakyThrows
@@ -164,6 +195,14 @@ public class TransactionService {
         WriteBatch batch = firestore.batch();
         documents.forEach(doc -> batch.delete(doc.getReference()));
         batch.commit().get();
+    }
+
+    public Map<String, List<Transaction>> groupByPartner(List<Transaction> transactions, String user) {
+        return transactions
+                .stream()
+                .collect(groupingBy(
+                        tx -> tx.getSender().equals(user) ? tx.getReceiver() : tx.getSender())
+                );
     }
 
     @SneakyThrows

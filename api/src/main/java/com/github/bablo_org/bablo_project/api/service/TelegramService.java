@@ -1,11 +1,14 @@
 package com.github.bablo_org.bablo_project.api.service;
 
 import static java.util.Arrays.asList;
+import static java.util.Optional.ofNullable;
 
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 
@@ -14,6 +17,7 @@ import com.github.bablo_org.bablo_project.api.model.telegram.BaseResponse;
 import com.github.bablo_org.bablo_project.api.model.telegram.GetUpdatesResponse;
 import com.github.bablo_org.bablo_project.api.model.telegram.TelegramToken;
 import com.github.bablo_org.bablo_project.api.model.telegram.Update;
+import com.github.bablo_org.bablo_project.api.model.telegram.User;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
@@ -28,7 +32,7 @@ public class TelegramService {
 
     private static final String SEND_MESSAGE_TEMPLATE = "https://api.telegram.org/bot%s/sendMessage?chat_id=%s&text=%s";
 
-    private static final String HELLO_MESSAGE = "Hello! I will notify you if anything interesting will happen";
+    private static final String HELLO_MESSAGE = "Hello, %s! Your account is now connected to the app, notifications are enabled, you may disable it in app settings";
 
     private final HttpClient client = HttpClient.newHttpClient();
 
@@ -50,7 +54,8 @@ public class TelegramService {
         for (Update update : updates) {
             if (update.message.from.userName.equals(username)) {
                 String userId = String.valueOf(update.message.from.id);
-                sendMessage(HELLO_MESSAGE, userId);
+                String userAlias = getAlias(update.message.from);
+                sendMessage(String.format(HELLO_MESSAGE, userAlias), userId);
                 return userId;
             }
         }
@@ -60,7 +65,7 @@ public class TelegramService {
 
     @SneakyThrows
     public void sendMessage(String message, String userId) {
-        String uri = String.format(SEND_MESSAGE_TEMPLATE, token.getToken(), userId, message);
+        String uri = String.format(SEND_MESSAGE_TEMPLATE, token.getToken(), userId, URLEncoder.encode(message, StandardCharsets.UTF_8));
         HttpRequest request = HttpRequest.newBuilder(URI.create(uri))
                 .POST(HttpRequest.BodyPublishers.noBody())
                 .build();
@@ -70,5 +75,10 @@ public class TelegramService {
         if (!res.ok) {
             throw new RuntimeException("bad response on sending message: " + res);
         }
+    }
+
+    private String getAlias(User tgUser) {
+        return ofNullable(tgUser.firstName)
+                .orElse(tgUser.userName);
     }
 }

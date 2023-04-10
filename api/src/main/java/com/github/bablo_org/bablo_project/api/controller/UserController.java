@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestAttribute;
@@ -37,8 +38,18 @@ public class UserController extends BaseController {
         return service.getAll();
     }
 
+    @PutMapping("/connectTelegram/{tgUsername}")
+    ResponseEntity<String> connectTelegram(@PathVariable("tgUsername") String tgUsername,
+                                           @RequestAttribute(USER_TOKEN) FirebaseToken userToken) {
+        service.connectTelegram(tgUsername, userToken.getUid());
+        return ResponseEntity
+                .ok()
+                .build();
+    }
+
     @PutMapping("/updateProfile")
-    ResponseEntity<String> updateProfile(@RequestBody UpdateUserProfileRequest request, @RequestAttribute(USER_TOKEN) FirebaseToken userToken) {
+    ResponseEntity<String> updateProfile(@RequestBody UpdateUserProfileRequest request,
+                                         @RequestAttribute(USER_TOKEN) FirebaseToken userToken) {
         service.updateCurrentProfile(request, userToken.getUid());
         return ResponseEntity
                 .ok()
