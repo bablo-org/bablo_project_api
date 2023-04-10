@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.bablo_org.bablo_project.api.model.currencyExternal.ExchangeRatesToken;
 import com.github.bablo_org.bablo_project.api.model.telegram.TelegramToken;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.firestore.Firestore;
@@ -84,6 +85,15 @@ public class BeansConfiguration {
         InputStream is = getClass().getClassLoader().getResourceAsStream("telegram-token.txt");
         try (BufferedReader br = new BufferedReader(new InputStreamReader(is))){
             return new TelegramToken(br.readLine());
+        }
+    }
+
+    @Bean
+    @SneakyThrows
+    ExchangeRatesToken exchangeRatesToken() {
+        InputStream is = getClass().getClassLoader().getResourceAsStream("exchange-rates-token.txt");
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(is))){
+            return new ExchangeRatesToken(br.readLine());
         }
     }
 }
