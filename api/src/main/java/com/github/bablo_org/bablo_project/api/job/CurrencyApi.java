@@ -1,8 +1,7 @@
 package com.github.bablo_org.bablo_project.api.job;
 
-import com.github.bablo_org.bablo_project.api.model.currencyExternal.ExchangeRatesToken;
+import com.github.bablo_org.bablo_project.api.model.exchangeRate.ExchangeRatesToken;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;

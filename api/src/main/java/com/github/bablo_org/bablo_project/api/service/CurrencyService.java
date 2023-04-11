@@ -2,18 +2,15 @@ package com.github.bablo_org.bablo_project.api.service;
 
 import static com.google.cloud.firestore.FieldPath.documentId;
 import static com.google.cloud.firestore.Filter.inArray;
-import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.github.bablo_org.bablo_project.api.model.Currency;
-import com.github.bablo_org.bablo_project.api.model.Transaction;
-import com.github.bablo_org.bablo_project.api.model.currencyExternal.CurrencyExternal;
-import com.github.bablo_org.bablo_project.api.model.currencyExternal.CurrencyInfo;
+import com.github.bablo_org.bablo_project.api.model.exchangeRate.CurrencyRate;
+import com.github.bablo_org.bablo_project.api.model.exchangeRate.CurrencyInfo;
 import com.google.cloud.firestore.CollectionReference;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.WriteBatch;
@@ -42,7 +39,7 @@ public class CurrencyService {
     }
 
     @SneakyThrows
-    public void updateRates(List<CurrencyExternal> currencies) {
+    public void updateRates(List<CurrencyRate> currencies) {
         WriteBatch batch = firestore.batch();
         CollectionReference collection = firestore.collection(COLLECTION_NAME);
 

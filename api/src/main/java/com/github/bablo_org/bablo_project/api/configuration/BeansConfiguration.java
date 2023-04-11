@@ -6,7 +6,7 @@ import java.io.InputStreamReader;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.bablo_org.bablo_project.api.model.currencyExternal.ExchangeRatesToken;
+import com.github.bablo_org.bablo_project.api.model.exchangeRate.ExchangeRatesToken;
 import com.github.bablo_org.bablo_project.api.model.telegram.TelegramToken;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.firestore.Firestore;
