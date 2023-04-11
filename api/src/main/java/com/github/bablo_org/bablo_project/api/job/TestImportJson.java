@@ -10,19 +10,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 public class TestImportJson {
-    public static void main(String[] args) {
-        TestImportJson resource = new TestImportJson( );
-        String jsonString = resource.getResource("api response.json");
-        System.out.println(jsonString);
-        System.out.println("finish");
-
-        JsonObject jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
-
-        System.out.println(jsonObject);
-        System.out.println(jsonObject.get("phonetype"));
-        System.out.println(jsonObject.get("cat"));
-
-    }
 
     public String getResource(String resource) {
         StringBuilder json = new StringBuilder();

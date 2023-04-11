@@ -1,5 +1,6 @@
 package com.github.bablo_org.bablo_project.api.controller;
 
+import com.github.bablo_org.bablo_project.api.job.CurrencyInfoJob;
 import com.github.bablo_org.bablo_project.api.job.CurrencyRates;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -14,8 +15,17 @@ import org.springframework.web.bind.annotation.RestController;
 public class CurrencyJobController extends BaseController{
     private final CurrencyRates currencyRates;
 
-    @GetMapping
-    void run(){
+    private final CurrencyInfoJob currencyInfoJob;
+
+    @GetMapping("/rate")
+    void rate(){
         currencyRates.run( );
     }
+
+    @GetMapping("/info")
+    void info(){
+        currencyInfoJob.run( );
+    }
+
 }
+
