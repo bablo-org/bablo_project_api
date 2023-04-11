@@ -1,4 +1,4 @@
-package com.github.bablo_org.bablo_project.api.model.currencyExternal;
+package com.github.bablo_org.bablo_project.api.model.exchangeRate;
 
 import lombok.Value;
 

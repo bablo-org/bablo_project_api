@@ -1,4 +1,4 @@
-package com.github.bablo_org.bablo_project.api.model.currencyExternal;
+package com.github.bablo_org.bablo_project.api.model.exchangeRate;
 
 import lombok.Value;
 
@@ -9,7 +9,7 @@ import java.util.Map;
 import static java.util.Optional.ofNullable;
 
 @Value
-public class CurrencyExternal {
+public class CurrencyRate {
     String id;
     Double rate;
     Date updated;

@@ -2,12 +2,14 @@ package com.github.bablo_org.bablo_project.api.job;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.bablo_org.bablo_project.api.model.currencyExternal.CurrencyInfo;
+import com.github.bablo_org.bablo_project.api.model.exchangeRate.CurrencyInfo;
 import com.github.bablo_org.bablo_project.api.service.CurrencyService;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Component;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,7 +18,7 @@ import java.util.List;
 @Component
 public class CurrencyInfoJob {
 
-    private static final String CURRENCY_NAME_FILE = "currency names.json";
+    private static final String CURRENCY_NAME_FILE = "currency-names.json";
 
     private final CurrencyService service;
 
