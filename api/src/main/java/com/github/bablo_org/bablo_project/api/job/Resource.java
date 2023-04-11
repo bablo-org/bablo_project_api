@@ -1,15 +1,12 @@
 package com.github.bablo_org.bablo_project.api.job;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
-public class TestImportJson {
+public class Resource {
 
     public String getResource(String resource) {
         StringBuilder json = new StringBuilder();
