@@ -8,8 +8,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Component;
 
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,7 +24,7 @@ public class CurrencyInfoJob {
 
     @SneakyThrows
     public void run() {
-        TestImportJson resource = new TestImportJson();
+        Resource resource = new Resource();
         String jsonStringNames = resource.getResource(CURRENCY_NAME_FILE);
 
         JsonNode root = mapper.readTree(jsonStringNames);
