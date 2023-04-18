@@ -121,11 +121,12 @@ public class UserService {
     }
 
     @SneakyThrows
-    public void connectTelegram(String tgUsername, String userId) {
-        String tgId = telegramService.resolveId(tgUsername);
+    public void connectTelegram(String telegramUser, String userId) {
+        String tgId = telegramService.resolveId(telegramUser);
         firestore.collection(DB_COLLECTION_NAME)
                 .document(userId)
                 .update(
+                        FieldPath.of("telegramUser"), telegramUser,
                         FieldPath.of("telegramId"), tgId,
                         FieldPath.of("settings", "enableTelegramNotifications"), true
                 )
