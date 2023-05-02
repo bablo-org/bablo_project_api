@@ -17,6 +17,7 @@ public class User {
     private String name;
     private String email;
     private String avatar;
+    private String telegramUser;
     private String telegramId;
     private Date created;
     private boolean isAdmin;
@@ -28,6 +29,7 @@ public class User {
                 doc.getString("name"),
                 doc.getString("email"),
                 doc.getString("avatar"),
+                doc.getString("telegramUser"),
                 doc.getString("telegramId"),
                 doc.getDate("created"),
                 ofNullable(doc.getBoolean("isAdmin")).orElse(false),

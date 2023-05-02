@@ -38,10 +38,10 @@ public class UserController extends BaseController {
         return service.getAll();
     }
 
-    @PutMapping("/connectTelegram/{tgUsername}")
-    ResponseEntity<String> connectTelegram(@PathVariable("tgUsername") String tgUsername,
+    @PutMapping("/connectTelegram/{telegramUser}")
+    ResponseEntity<String> connectTelegram(@PathVariable("telegramUser") String telegramUser,
                                            @RequestAttribute(USER_TOKEN) FirebaseToken userToken) {
-        service.connectTelegram(tgUsername, userToken.getUid());
+        service.connectTelegram(telegramUser, userToken.getUid());
         return ResponseEntity
                 .ok()
                 .build();
