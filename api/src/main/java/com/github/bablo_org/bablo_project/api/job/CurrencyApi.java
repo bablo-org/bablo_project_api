@@ -32,5 +32,5 @@ public class CurrencyApi {
         JsonParser jp = new JsonParser();
         JsonElement root = jp.parse(new InputStreamReader((InputStream) request.getContent()));
         return root.getAsJsonObject().toString();
-    };
+    }
 }
