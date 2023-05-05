@@ -31,7 +31,7 @@ public class AuthFilter implements Filter {
         HttpServletResponse res = (HttpServletResponse) response;
 
         try {
-            if (isProtected(req)) {
+            if (!isProtected(req)) {
                 String authorization = req.getHeader("Authorization");
 
                 if (StringUtils.isBlank(authorization)) {
