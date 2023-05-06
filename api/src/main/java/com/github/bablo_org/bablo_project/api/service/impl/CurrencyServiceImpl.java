@@ -8,9 +8,9 @@ import static java.util.stream.Collectors.toMap;
 import java.util.List;
 import java.util.Map;
 
+import com.github.bablo_org.bablo_project.api.client.impl.CurrencyInfoClientImpl;
+import com.github.bablo_org.bablo_project.api.client.impl.CurrencyRatesClientImpl;
 import com.github.bablo_org.bablo_project.api.model.Currency;
-import com.github.bablo_org.bablo_project.api.model.CurrencyAPI.CurrencyRates;
-import com.github.bablo_org.bablo_project.api.model.CurrencyAPI.CurrencyInfo;
 import com.github.bablo_org.bablo_project.api.service.CurrencyService;
 import com.google.cloud.firestore.CollectionReference;
 import com.google.cloud.firestore.Firestore;
@@ -29,39 +29,38 @@ public class CurrencyServiceImpl implements CurrencyService {
 
     private final Firestore firestore;
 
+    private final CurrencyRatesClientImpl apiRates;
+
+
+    private final CurrencyInfoClientImpl apiInfo;
+
     @SneakyThrows
     public void add(List<Currency> currencies) {
         WriteBatch batch = firestore.batch();
         CollectionReference collection = firestore.collection(COLLECTION_NAME);
 
-        currencies.forEach(t -> {
-            batch.set(collection.document(t.getId()), t.toMap());
-        });
-
+        currencies.forEach(
+                t -> batch.set(collection.document(t.getId()), t.toMap()));
         batch.commit().get();
     }
 
     @SneakyThrows
-    public void updateRates(List<CurrencyRates> currencies) {
+    public void updateRates() {
         WriteBatch batch = firestore.batch();
         CollectionReference collection = firestore.collection(COLLECTION_NAME);
 
-        currencies.forEach(t -> {
-            batch.update(collection.document(t.getId()), t.toMap());
-        });
-
+        apiRates.getRates().forEach(
+                t -> batch.update(collection.document(t.getId()), t.toMap()));
         batch.commit().get();
     }
 
     @SneakyThrows
-    public void updateInfo(List<CurrencyInfo> currencies) {
+    public void updateInfo() {
         WriteBatch batch = firestore.batch();
         CollectionReference collection = firestore.collection(COLLECTION_NAME);
 
-        currencies.forEach(t -> {
-            batch.update(collection.document(t.getId()), t.toMap());
-        });
-
+        apiInfo.getInfo().forEach(
+                t -> batch.update(collection.document(t.getId()), t.toMap()));
         batch.commit().get();
     }
 

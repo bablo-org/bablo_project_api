@@ -1,9 +1,6 @@
 package com.github.bablo_org.bablo_project.api.controller;
 
 import java.util.List;
-
-import com.github.bablo_org.bablo_project.api.client.CurrencyInfoClient;
-import com.github.bablo_org.bablo_project.api.client.CurrencyRatesClient;
 import com.github.bablo_org.bablo_project.api.model.Currency;
 import com.github.bablo_org.bablo_project.api.service.CurrencyService;
 import lombok.RequiredArgsConstructor;
@@ -17,9 +14,6 @@ public class CurrencyController extends BaseController {
 
     private final CurrencyService service;
 
-    private final CurrencyRatesClient apiRates;
-
-    private final CurrencyInfoClient apiInfo;
 
     @GetMapping
     @ResponseBody
@@ -29,12 +23,12 @@ public class CurrencyController extends BaseController {
 
 
     @PutMapping("/updateRates")
-    void updateRates(){
-        service.updateRates(apiRates.getRates());
+    void updateRates() {
+        service.updateRates();
     }
 
     @PutMapping("/updateInfo")
-    void updateInfo(){
-        service.updateInfo(apiInfo.getInfo());
+    void updateInfo() {
+        service.updateInfo();
     }
 }
