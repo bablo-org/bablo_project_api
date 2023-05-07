@@ -22,12 +22,12 @@ public class CurrencyController extends BaseController {
     }
 
 
-    @PutMapping("/updateRates")
+    @PutMapping("/job/updateRates")
     void updateRates() {
         service.updateRates();
     }
 
-    @PutMapping("/updateInfo")
+    @PutMapping("/job/updateInfo")
     void updateInfo() {
         service.updateInfo();
     }
