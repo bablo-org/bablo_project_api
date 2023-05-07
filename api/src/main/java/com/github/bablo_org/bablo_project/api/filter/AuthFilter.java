@@ -33,7 +33,7 @@ public class AuthFilter implements Filter {
         try {
             if (isProtected(req)) {
                 String authorization = req.getHeader("Authorization");
-
+                log.info("Authorization:" + authorization);
                 if (StringUtils.isBlank(authorization)) {
                     res.setStatus(HttpStatus.UNAUTHORIZED.value());
                     res.getWriter().write("unauthorized");
@@ -51,6 +51,7 @@ public class AuthFilter implements Filter {
         } catch (Exception e) {
             res.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
             response.getWriter().write(e.getMessage());
+            log.error(e.getMessage(), e);
         }
     }
 
