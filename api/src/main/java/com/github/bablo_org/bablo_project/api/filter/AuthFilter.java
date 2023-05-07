@@ -9,13 +9,20 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.github.bablo_org.bablo_project.api.Constants;
 import com.github.bablo_org.bablo_project.api.utils.StringUtils;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseToken;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+
+import java.util.Collections;
 
 @Slf4j
 @Component
@@ -23,6 +30,11 @@ import org.springframework.stereotype.Component;
 public class AuthFilter implements Filter {
 
     private final FirebaseAuth firebaseAuth;
+
+
+    @Value("${project.id}")
+    private String projectId;
+
 
     @Override
     @SneakyThrows
@@ -33,7 +45,7 @@ public class AuthFilter implements Filter {
         try {
             if (isProtected(req)) {
                 String authorization = req.getHeader("Authorization");
-                log.info("Authorization:" + authorization);
+
                 if (StringUtils.isBlank(authorization)) {
                     res.setStatus(HttpStatus.UNAUTHORIZED.value());
                     res.getWriter().write("unauthorized");
@@ -43,8 +55,18 @@ public class AuthFilter implements Filter {
                 String token = authorization.contains(" ")
                         ? authorization.split(" ")[1]
                         : authorization;
-                FirebaseToken userToken = firebaseAuth.verifyIdToken(token);
-                request.setAttribute(Constants.USER_TOKEN, userToken);
+
+                if (isJob(req)) {
+                    GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(),
+                            new GsonFactory())
+                            .setAudience(Collections.singletonList(projectId))
+                            .build();
+                    GoogleIdToken idToken = verifier.verify(token);
+                    log.info("user: "+idToken.getPayload().getEmail());
+                } else {
+                    FirebaseToken userToken = firebaseAuth.verifyIdToken(token);
+                    request.setAttribute(Constants.USER_TOKEN, userToken);
+                }
             }
 
             filterChain.doFilter(request, response);
@@ -60,4 +82,10 @@ public class AuthFilter implements Filter {
                 && !request.getRequestURI().contains("/swagger")
                 && !request.getRequestURI().contains("/api-docs"); // exclude docs endpoint
     }
+
+    private boolean isJob(HttpServletRequest request) {
+        return request.getRequestURI().contains("/job");
+    }
+
+
 }
