@@ -32,8 +32,7 @@ public class AuthFilter implements Filter {
     private final FirebaseAuth firebaseAuth;
 
 
-    @Value("${project.id}")
-    private String projectId;
+    private final GoogleIdTokenVerifier googleIdTokenVerifier;
 
 
     @Override
@@ -57,12 +56,8 @@ public class AuthFilter implements Filter {
                         : authorization;
 
                 if (isJob(req)) {
-                    GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(),
-                            new GsonFactory())
-                            .setAudience(Collections.singletonList(projectId))
-                            .build();
-                    GoogleIdToken idToken = verifier.verify(token);
-                    log.info("user: "+idToken.getPayload().getEmail());
+                    GoogleIdToken idToken = googleIdTokenVerifier.verify(token);
+                    log.info("Job launched with user: "+idToken.getPayload().getEmail());
                 } else {
                     FirebaseToken userToken = firebaseAuth.verifyIdToken(token);
                     request.setAttribute(Constants.USER_TOKEN, userToken);
@@ -84,7 +79,7 @@ public class AuthFilter implements Filter {
     }
 
     private boolean isJob(HttpServletRequest request) {
-        return request.getRequestURI().contains("/job");
+        return request.getRequestURI().contains("/job/");
     }
 
 

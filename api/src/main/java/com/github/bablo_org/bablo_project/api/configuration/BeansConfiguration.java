@@ -3,10 +3,14 @@ package com.github.bablo_org.bablo_project.api.configuration;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Collections;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.bablo_org.bablo_project.api.model.telegram.TelegramToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.FirestoreOptions;
@@ -71,6 +75,14 @@ public class BeansConfiguration {
     @Bean
     FirebaseAuth firebaseAuth(FirebaseApp firebase) {
         return FirebaseAuth.getInstance(firebase);
+    }
+
+    @Bean
+    GoogleIdTokenVerifier googleIdTokenVerifier(@Value("${project.id}") String projectId){
+        return new GoogleIdTokenVerifier.Builder(new NetHttpTransport(),
+                new GsonFactory())
+                .setAudience(Collections.singletonList(projectId))
+                .build();
     }
 
     @Bean
