@@ -4,7 +4,7 @@ import static com.github.bablo_org.bablo_project.api.Constants.USER_TOKEN;
 
 import java.util.List;
 
-import com.github.bablo_org.bablo_project.api.model.Transaction;
+import com.github.bablo_org.bablo_project.api.model.domain.Transaction;
 import com.github.bablo_org.bablo_project.api.service.TransactionService;
 import com.google.firebase.auth.FirebaseToken;
 import lombok.RequiredArgsConstructor;

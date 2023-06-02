@@ -10,11 +10,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.StreamSupport;
 
-import com.github.bablo_org.bablo_project.api.model.Currency;
-import com.github.bablo_org.bablo_project.api.model.Settings;
-import com.github.bablo_org.bablo_project.api.model.StorageFile;
-import com.github.bablo_org.bablo_project.api.model.UpdateUserProfileRequest;
-import com.github.bablo_org.bablo_project.api.model.User;
+import com.github.bablo_org.bablo_project.api.model.domain.Currency;
+import com.github.bablo_org.bablo_project.api.model.domain.Settings;
+import com.github.bablo_org.bablo_project.api.model.domain.StorageFile;
+import com.github.bablo_org.bablo_project.api.model.dto.UpdateUserProfileRequest;
+import com.github.bablo_org.bablo_project.api.model.domain.User;
 import com.github.bablo_org.bablo_project.api.service.CurrencyService;
 import com.github.bablo_org.bablo_project.api.service.TelegramService;
 import com.github.bablo_org.bablo_project.api.service.UserService;

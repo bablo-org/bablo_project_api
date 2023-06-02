@@ -3,7 +3,7 @@ package com.github.bablo_org.bablo_project.api.service;
 import java.util.List;
 import java.util.Map;
 
-import com.github.bablo_org.bablo_project.api.model.Transaction;
+import com.github.bablo_org.bablo_project.api.model.domain.Transaction;
 
 public interface TransactionService {
 

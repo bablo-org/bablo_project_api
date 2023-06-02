@@ -1,4 +1,4 @@
-package com.github.bablo_org.bablo_project.api.model;
+package com.github.bablo_org.bablo_project.api.model.dto;
 
 import java.util.HashMap;
 import java.util.Map;

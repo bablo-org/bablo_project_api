@@ -5,10 +5,10 @@ import static com.github.bablo_org.bablo_project.api.Constants.USER_TOKEN;
 import java.util.Base64;
 import java.util.List;
 
-import com.github.bablo_org.bablo_project.api.model.Settings;
-import com.github.bablo_org.bablo_project.api.model.StorageFile;
-import com.github.bablo_org.bablo_project.api.model.UpdateUserProfileRequest;
-import com.github.bablo_org.bablo_project.api.model.User;
+import com.github.bablo_org.bablo_project.api.model.domain.Settings;
+import com.github.bablo_org.bablo_project.api.model.domain.StorageFile;
+import com.github.bablo_org.bablo_project.api.model.dto.UpdateUserProfileRequest;
+import com.github.bablo_org.bablo_project.api.model.domain.User;
 import com.github.bablo_org.bablo_project.api.service.UserService;
 import com.google.firebase.auth.FirebaseToken;
 import lombok.RequiredArgsConstructor;

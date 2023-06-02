@@ -15,10 +15,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.github.bablo_org.bablo_project.api.model.Settings;
-import com.github.bablo_org.bablo_project.api.model.Transaction;
-import com.github.bablo_org.bablo_project.api.model.TransactionStatus;
-import com.github.bablo_org.bablo_project.api.model.User;
+import com.github.bablo_org.bablo_project.api.model.domain.Settings;
+import com.github.bablo_org.bablo_project.api.model.domain.Transaction;
+import com.github.bablo_org.bablo_project.api.model.domain.TransactionStatus;
+import com.github.bablo_org.bablo_project.api.model.domain.User;
 import com.github.bablo_org.bablo_project.api.service.TelegramService;
 import com.github.bablo_org.bablo_project.api.service.TransactionService;
 import com.github.bablo_org.bablo_project.api.utils.StringUtils;

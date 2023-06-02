@@ -1,6 +1,6 @@
 package com.github.bablo_org.bablo_project.api.controller;
 
-import com.github.bablo_org.bablo_project.api.model.Error;
+import com.github.bablo_org.bablo_project.api.model.dto.Error;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
