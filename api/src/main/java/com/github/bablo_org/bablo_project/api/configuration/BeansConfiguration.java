@@ -78,9 +78,9 @@ public class BeansConfiguration {
     }
 
     @Bean
-    GoogleIdTokenVerifier googleIdTokenVerifier(@Value("${project.id}") String projectId){
+    GoogleIdTokenVerifier googleIdTokenVerifier(@Value("${project.id}") String projectId) {
         return new GoogleIdTokenVerifier.Builder(new NetHttpTransport(),
-                new GsonFactory())
+                                                 new GsonFactory())
                 .setAudience(Collections.singletonList(projectId))
                 .build();
     }
@@ -97,7 +97,7 @@ public class BeansConfiguration {
     @SneakyThrows
     TelegramToken telegramToken() {
         InputStream is = getClass().getClassLoader().getResourceAsStream("telegram-token.txt");
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(is))){
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
             return new TelegramToken(br.readLine());
         }
     }

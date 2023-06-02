@@ -68,7 +68,10 @@ public class TelegramServiceImpl implements TelegramService {
     @Override
     @SneakyThrows
     public void sendMessage(String message, String userId) {
-        String uri = String.format(SEND_MESSAGE_TEMPLATE, token.getToken(), userId, URLEncoder.encode(message, StandardCharsets.UTF_8));
+        String uri = String.format(SEND_MESSAGE_TEMPLATE,
+                                   token.getToken(),
+                                   userId,
+                                   URLEncoder.encode(message, StandardCharsets.UTF_8));
         HttpRequest request = HttpRequest.newBuilder(URI.create(uri))
                 .POST(HttpRequest.BodyPublishers.noBody())
                 .build();

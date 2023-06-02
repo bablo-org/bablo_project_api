@@ -20,7 +20,7 @@ import com.github.bablo_org.bablo_project.api.model.Transaction;
 import com.github.bablo_org.bablo_project.api.model.TransactionStatus;
 import com.github.bablo_org.bablo_project.api.model.User;
 import com.github.bablo_org.bablo_project.api.service.TelegramService;
-import com.github.bablo_org.bablo_project.api.service.UserService;
+import com.github.bablo_org.bablo_project.api.service.TransactionService;
 import com.github.bablo_org.bablo_project.api.utils.StringUtils;
 import com.google.cloud.firestore.CollectionReference;
 import com.google.cloud.firestore.DocumentReference;
@@ -36,13 +36,13 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class TransactionServiceImpl implements com.github.bablo_org.bablo_project.api.service.TransactionService {
+public class TransactionServiceImpl implements TransactionService {
 
     private static final String COLLECTION_NAME = "transactions";
 
     private final Firestore firestore;
 
-    private final UserService userService;
+    private final UserServiceImpl userService;
 
     private final TelegramService telegramService;
 
