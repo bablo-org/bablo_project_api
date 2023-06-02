@@ -78,8 +78,10 @@ public class UserService {
             firestore.collection(DB_COLLECTION_NAME)
                     .document(userId)
                     .update(
-                            FieldPath.of("settings", "enableTelegramNotifications"), settings.getEnableTelegramNotifications(),
-                            FieldPath.of("settings", "favoriteCurrencies"), settings.getFavoriteCurrencies()
+                            FieldPath.of("settings", "enableTelegramNotifications"),
+                            settings.getEnableTelegramNotifications(),
+                            FieldPath.of("settings", "favoriteCurrencies"),
+                            settings.getFavoriteCurrencies()
                     )
                     .get();
         }
@@ -88,7 +90,8 @@ public class UserService {
             firestore.collection(DB_COLLECTION_NAME)
                     .document(userId)
                     .update(
-                            FieldPath.of("settings", "enableTelegramNotifications"), settings.getEnableTelegramNotifications()
+                            FieldPath.of("settings", "enableTelegramNotifications"),
+                            settings.getEnableTelegramNotifications()
                     )
                     .get();
         }
@@ -171,15 +174,5 @@ public class UserService {
         return firestore
                 .collection(DB_COLLECTION_NAME)
                 .document(id);
-    }
-
-    private void validateUpdateProfile(User user, String callerId) {
-        if (user == null) {
-            throw new RuntimeException("can't update non-existent user");
-        }
-
-        if (!user.getId().equals(callerId)) {
-            throw new RuntimeException("can't update user - current user is not a user to be updated");
-        }
     }
 }
