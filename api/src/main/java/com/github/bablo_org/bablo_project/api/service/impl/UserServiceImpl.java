@@ -7,18 +7,21 @@ import static java.util.stream.Collectors.toSet;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.StreamSupport;
+import javax.annotation.Nullable;
 
 import com.github.bablo_org.bablo_project.api.model.domain.Currency;
 import com.github.bablo_org.bablo_project.api.model.domain.Settings;
 import com.github.bablo_org.bablo_project.api.model.domain.StorageFile;
-import com.github.bablo_org.bablo_project.api.model.dto.UpdateUserProfileRequest;
 import com.github.bablo_org.bablo_project.api.model.domain.User;
+import com.github.bablo_org.bablo_project.api.model.dto.UpdateUserProfileRequest;
 import com.github.bablo_org.bablo_project.api.service.CurrencyService;
 import com.github.bablo_org.bablo_project.api.service.TelegramService;
 import com.github.bablo_org.bablo_project.api.service.UserService;
 import com.google.cloud.firestore.DocumentReference;
+import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.FieldPath;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.storage.Blob;
@@ -49,6 +52,17 @@ public class UserServiceImpl implements UserService {
     private final TelegramService telegramService;
 
     @Override
+    @Nullable
+    @SneakyThrows
+    public User getById(String id) {
+        DocumentSnapshot doc = getRefById(id)
+                .get()
+                .get();
+
+        return doc.exists() ? User.ofDoc(doc) : null;
+    }
+
+    @Override
     @SneakyThrows
     public List<User> getAll() {
         return firestore.collection(DB_COLLECTION_NAME)
@@ -58,6 +72,30 @@ public class UserServiceImpl implements UserService {
                 .stream()
                 .map(User::ofDoc)
                 .collect(toList());
+    }
+
+    @Override
+    @SneakyThrows
+    public void add(Map<String, Object> fields) {
+        if (fields.get("id") != null) {
+            firestore.collection(DB_COLLECTION_NAME)
+                    .add(fields)
+                    .get()
+                    .get()
+                    .get();
+        } else {
+            fields.remove("id");
+            update(String.valueOf(fields.get("id")), fields);
+        }
+    }
+
+    @Override
+    @SneakyThrows
+    public void update(String id, Map<String, Object> fields) {
+        firestore.collection(DB_COLLECTION_NAME)
+                .document(id)
+                .update(fields)
+                .get();
     }
 
     @Override
