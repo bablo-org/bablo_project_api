@@ -141,7 +141,7 @@ public class UserService {
         List<String> currencyIds = settings.getFavoriteCurrencies();
 
         if (currencyIds != null) {
-            List<String> dbCurrencyIds = currencyService.getById(currencyIds)
+            List<String> dbCurrencyIds = currencyService.getByIds(currencyIds)
                     .stream()
                     .map(Currency::getId)
                     .collect(toList());
