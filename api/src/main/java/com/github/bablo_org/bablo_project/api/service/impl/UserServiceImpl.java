@@ -1,6 +1,5 @@
 package com.github.bablo_org.bablo_project.api.service.impl;
 
-import static com.github.bablo_org.bablo_project.api.model.User.ofDoc;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
@@ -59,13 +58,6 @@ public class UserServiceImpl implements UserService {
                 .stream()
                 .map(User::ofDoc)
                 .collect(toList());
-    }
-
-    @Override
-    @SneakyThrows
-    public User getById(String id) {
-        DocumentReference ref = getRefById(id);
-        return ofDoc(ref.get().get());
     }
 
     @Override

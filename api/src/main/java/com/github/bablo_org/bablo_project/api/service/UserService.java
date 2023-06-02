@@ -11,13 +11,11 @@ public interface UserService {
 
     List<User> getAll();
 
-    User getById(String id);
+    StorageFile uploadAvatar(String fileName, byte[] content, String user);
 
     void updateCurrentProfile(UpdateUserProfileRequest profile, String userId);
 
     void updateSettings(Settings settings, String userId);
-
-    StorageFile uploadAvatar(String fileName, byte[] content, String user);
 
     void connectTelegram(String telegramUser, String userId);
 }

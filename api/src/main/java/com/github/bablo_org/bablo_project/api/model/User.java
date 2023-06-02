@@ -4,6 +4,7 @@ import static java.util.Optional.ofNullable;
 
 import java.util.Date;
 
+import com.google.cloud.Timestamp;
 import com.google.cloud.firestore.DocumentSnapshot;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,8 +21,9 @@ public class User {
     private String telegramUser;
     private String telegramId;
     private Date created;
-    private boolean isAdmin;
+    private Date updated;
     private Settings settings;
+    private boolean isActive;
 
     public static User ofDoc(DocumentSnapshot doc) {
         return new User(
@@ -32,8 +34,12 @@ public class User {
                 doc.getString("telegramUser"),
                 doc.getString("telegramId"),
                 doc.getDate("created"),
-                ofNullable(doc.getBoolean("isAdmin")).orElse(false),
-                Settings.ofDoc(doc)
+                ofNullable(doc.getUpdateTime())
+                        .map(Timestamp::toDate)
+                        .orElse(null),
+                Settings.ofDoc(doc),
+                ofNullable(doc.getBoolean("isActive"))
+                        .orElse(true)
         );
     }
 }

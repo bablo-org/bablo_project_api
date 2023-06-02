@@ -19,7 +19,5 @@ public interface TransactionService {
 
     void complete(List<String> ids, String user);
 
-    void delete(List<String> ids, String userId);
-
     Map<String, List<Transaction>> groupByPartner(List<Transaction> transactions, String user);
 }

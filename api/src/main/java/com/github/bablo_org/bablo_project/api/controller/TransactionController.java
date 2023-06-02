@@ -10,7 +10,6 @@ import com.google.firebase.auth.FirebaseToken;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -69,14 +68,6 @@ public class TransactionController extends BaseController {
     @PutMapping("/complete")
     ResponseEntity<String> complete(@RequestBody List<String> ids, @RequestAttribute(USER_TOKEN) FirebaseToken userToken) {
         service.complete(ids, userToken.getUid());
-        return ResponseEntity
-                .ok()
-                .build();
-    }
-
-    @DeleteMapping
-    ResponseEntity<String> delete(@RequestBody List<String> ids, @RequestAttribute(USER_TOKEN) FirebaseToken userToken) {
-        service.delete(ids, userToken.getUid());
         return ResponseEntity
                 .ok()
                 .build();

@@ -192,21 +192,6 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    @SneakyThrows
-    public void delete(List<String> ids, String userId) {
-        User user = userService.getById(userId);
-        if (!user.isAdmin()) {
-            throw new RuntimeException("only admin has permission to delete transactions (even this is temporary)");
-        }
-
-        List<DocumentSnapshot> documents = getByIds(ids);
-
-        WriteBatch batch = firestore.batch();
-        documents.forEach(doc -> batch.delete(doc.getReference()));
-        batch.commit().get();
-    }
-
-    @Override
     public Map<String, List<Transaction>> groupByPartner(List<Transaction> transactions, String user) {
         return transactions
                 .stream()
