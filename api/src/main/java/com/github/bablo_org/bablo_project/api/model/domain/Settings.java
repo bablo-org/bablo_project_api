@@ -1,9 +1,7 @@
 package com.github.bablo_org.bablo_project.api.model.domain;
 
 import static java.util.Collections.emptyList;
-import static java.util.Optional.ofNullable;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -31,14 +29,5 @@ public class Settings {
                 (List<String>) settings.get("favoriteCurrencies"),
                 (Boolean) settings.get("enableTelegramNotifications")
         );
-    }
-
-    public Map<String, Object> toMap() {
-        Map<String, Object> map = new HashMap<>();
-
-        ofNullable(favoriteCurrencies).ifPresent(v -> map.put("favoriteCurrencies", favoriteCurrencies));
-        ofNullable(enableTelegramNotifications).ifPresent(v -> map.put("enableTelegramNotifications", enableTelegramNotifications));
-
-        return map;
     }
 }
