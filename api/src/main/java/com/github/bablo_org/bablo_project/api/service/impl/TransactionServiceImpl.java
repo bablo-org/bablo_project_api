@@ -21,7 +21,6 @@ import com.github.bablo_org.bablo_project.api.model.domain.TransactionStatus;
 import com.github.bablo_org.bablo_project.api.model.domain.User;
 import com.github.bablo_org.bablo_project.api.service.TelegramService;
 import com.github.bablo_org.bablo_project.api.service.TransactionService;
-import com.github.bablo_org.bablo_project.api.utils.StringUtils;
 import com.google.cloud.firestore.CollectionReference;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
@@ -31,6 +30,7 @@ import com.google.cloud.firestore.WriteBatch;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 @Slf4j
