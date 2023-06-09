@@ -76,22 +76,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @SneakyThrows
-    public void add(Map<String, Object> fields) {
-        if (fields.get("id") != null) {
-            firestore.collection(DB_COLLECTION_NAME)
-                    .add(fields)
-                    .get()
-                    .get()
-                    .get();
-        } else {
-            fields.remove("id");
-            update(String.valueOf(fields.get("id")), fields);
-        }
-    }
-
-    @Override
-    @SneakyThrows
-    public void update(String id, Map<String, Object> fields) {
+    public void addOrUpdate(String id, Map<String, Object> fields) {
         firestore.collection(DB_COLLECTION_NAME)
                 .document(id)
                 .update(fields)

@@ -19,14 +19,14 @@ public class RegistrationServiceImpl implements RegistrationService {
         User user = userService.getById(id);
 
         if (user == null) {
-            userService.add(Map.of("id", id, "email", email));
+            userService.addOrUpdate(id, Map.of("email", email, "isActive", true));
             return;
         }
 
         if (user.isActive()) {
             throw new RuntimeException("user is already exists and active");
         }
-        userService.update(user.getId(), Map.of("isActive", true));
+        userService.addOrUpdate(id, Map.of("isActive", true));
     }
 
     @Override
@@ -41,6 +41,6 @@ public class RegistrationServiceImpl implements RegistrationService {
             throw new RuntimeException("user is already inactive");
         }
 
-        userService.update(id, Map.of("isActive", false));
+        userService.addOrUpdate(id, Map.of("isActive", false));
     }
 }

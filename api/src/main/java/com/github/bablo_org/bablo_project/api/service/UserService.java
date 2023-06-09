@@ -2,13 +2,12 @@ package com.github.bablo_org.bablo_project.api.service;
 
 import java.util.List;
 import java.util.Map;
-
 import javax.annotation.Nullable;
 
 import com.github.bablo_org.bablo_project.api.model.domain.Settings;
 import com.github.bablo_org.bablo_project.api.model.domain.StorageFile;
-import com.github.bablo_org.bablo_project.api.model.dto.UpdateUserProfileRequest;
 import com.github.bablo_org.bablo_project.api.model.domain.User;
+import com.github.bablo_org.bablo_project.api.model.dto.UpdateUserProfileRequest;
 
 public interface UserService {
 
@@ -17,11 +16,9 @@ public interface UserService {
 
     List<User> getAll();
 
-    void add(Map<String, Object> fields);
-
     StorageFile uploadAvatar(String fileName, byte[] content, String user);
 
-    void update(String id, Map<String, Object> fields);
+    void addOrUpdate(String id, Map<String, Object> fields);
 
     void updateCurrentProfile(UpdateUserProfileRequest profile, String userId);
 
