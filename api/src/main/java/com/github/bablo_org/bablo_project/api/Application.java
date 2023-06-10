@@ -7,8 +7,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class Application {
 
     public static void main(String[] args) {
-        long start = System.currentTimeMillis();
         SpringApplication.run(Application.class, args);
-        System.out.println("### " + ((System.currentTimeMillis()) - start));
     }
 }
