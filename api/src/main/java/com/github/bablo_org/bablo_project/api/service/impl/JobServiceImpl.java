@@ -31,7 +31,7 @@ public class JobServiceImpl implements JobService {
         Date now = new Date();
         CurrencyRatesSnapshot rates = client.getActual();
 
-        updateRatesHistory(rates.getRates(), now);
+        updateRatesHistory(rates.getRates());
         log.info("rates history has been successfully updated");
 
         currencyService.updateRates(rates.getRates(), now);
@@ -39,10 +39,10 @@ public class JobServiceImpl implements JobService {
     }
 
     @SneakyThrows
-    private void updateRatesHistory(Map<String, Double> rates, Date timestamp) {
+    private void updateRatesHistory(Map<String, Double> rates) {
         firestore.collection("rates")
                 .document(LocalDate.now().toString())
-                .set(Map.of("date", timestamp, "rates", rates))
+                .set(rates)
                 .get();
     }
 }
