@@ -79,7 +79,7 @@ public class UserServiceImpl implements UserService {
     public void addOrUpdate(String id, Map<String, Object> fields) {
         firestore.collection(DB_COLLECTION_NAME)
                 .document(id)
-                .update(fields)
+                .set(fields)
                 .get();
     }
 
