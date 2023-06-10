@@ -1,4 +1,4 @@
-package com.github.bablo_org.bablo_project.api.model.telegram;
+package com.github.bablo_org.bablo_project.api.model.token;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

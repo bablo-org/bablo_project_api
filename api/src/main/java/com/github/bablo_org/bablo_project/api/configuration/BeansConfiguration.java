@@ -7,7 +7,8 @@ import java.util.Collections;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.bablo_org.bablo_project.api.model.telegram.TelegramToken;
+import com.github.bablo_org.bablo_project.api.model.token.CurrencyRatesApiToken;
+import com.github.bablo_org.bablo_project.api.model.token.TelegramToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
@@ -99,6 +100,15 @@ public class BeansConfiguration {
         InputStream is = getClass().getClassLoader().getResourceAsStream("telegram-token.txt");
         try (BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
             return new TelegramToken(br.readLine());
+        }
+    }
+
+    @Bean
+    @SneakyThrows
+    CurrencyRatesApiToken currencyRatesApiToken() {
+        InputStream is = getClass().getClassLoader().getResourceAsStream("exchange-rates-token.txt");
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
+            return new CurrencyRatesApiToken(br.readLine());
         }
     }
 }

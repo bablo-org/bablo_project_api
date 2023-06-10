@@ -4,11 +4,16 @@ import static com.google.cloud.firestore.FieldPath.documentId;
 import static com.google.cloud.firestore.Filter.inArray;
 import static java.util.stream.Collectors.toList;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import com.github.bablo_org.bablo_project.api.model.domain.Currency;
 import com.github.bablo_org.bablo_project.api.service.CurrencyService;
+import com.google.cloud.firestore.CollectionReference;
+import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.Firestore;
+import com.google.cloud.firestore.WriteBatch;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
@@ -46,4 +51,17 @@ public class CurrencyServiceImpl implements CurrencyService {
                 .collect(toList());
     }
 
+    @Override
+    @SneakyThrows
+    public void updateRates(Map<String, Double> rates, Date timestamp) {
+        CollectionReference collection = firestore.collection(COLLECTION_NAME);
+
+        WriteBatch batch = firestore.batch();
+        rates.forEach((code, rate) -> {
+            DocumentReference ref = collection.document(code);
+            batch.update(ref, Map.of("rate", rate, "updated", timestamp));
+        });
+
+        batch.commit().get();
+    }
 }
