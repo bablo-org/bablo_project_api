@@ -1,5 +1,6 @@
 package com.github.bablo_org.bablo_project.api.service.impl;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.Map;
 
@@ -40,7 +41,7 @@ public class JobServiceImpl implements JobService {
     @SneakyThrows
     private void updateRatesHistory(Map<String, Double> rates, Date timestamp) {
         firestore.collection("rates")
-                .document()
+                .document(LocalDate.now().toString())
                 .set(Map.of("date", timestamp, "rates", rates))
                 .get();
     }
