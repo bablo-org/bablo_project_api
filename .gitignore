@@ -2,3 +2,4 @@
 /api/target/
 api/src/main/resources/secrets.json
 api/src/main/resources/telegram-token.txt
+api/src/main/resources/exchange-rates-token.txt
