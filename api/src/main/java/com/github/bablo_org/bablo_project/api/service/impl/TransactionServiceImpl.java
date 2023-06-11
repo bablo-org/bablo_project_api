@@ -7,8 +7,10 @@ import static com.google.cloud.firestore.Filter.inArray;
 import static com.google.cloud.firestore.Filter.or;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -100,29 +102,7 @@ public class TransactionServiceImpl implements TransactionService {
         });
         batch.commit().get();
 
-        try {
-            sendNotifications(transactions, user);
-        } catch (Exception e) {
-            log.error("failed to send telegram notifications", e);
-        }
-    }
-
-    private void sendNotifications(List<Transaction> allTransactions, String userId) {
-        Map<String, List<Transaction>> byPartner = groupByPartner(allTransactions, userId);
-        Map<String, User> allUsers = userService.getAll()
-                .stream()
-                .collect(Collectors.toMap(User::getId, u -> u));
-
-        byPartner.forEach((partnerId, transactions) -> {
-            User partner = allUsers.get(partnerId);
-            User initiator = allUsers.get(userId);
-            Settings settings = partner.getSettings();
-            if (settings.getEnableTelegramNotifications()) {
-                telegramService.sendMessage(
-                        "You have " + transactions.size() + " new or updated transactions from " + initiator.getName(),
-                        partner.getTelegramId());
-            }
-        });
+        sendNotifications(NotificationEvent.ON_CREATE, transactions, user);
     }
 
     @Override
@@ -130,9 +110,11 @@ public class TransactionServiceImpl implements TransactionService {
     public void approve(List<String> ids, String user) {
         List<DocumentSnapshot> documents = getByIds(ids);
 
+        List<Transaction> transactions = new ArrayList<>();
         for (DocumentSnapshot document : documents) {
             Transaction transaction = Transaction.ofDoc(document);
             validateApprove(transaction, user);
+            transactions.add(transaction);
         }
 
         Date now = new Date();
@@ -145,6 +127,8 @@ public class TransactionServiceImpl implements TransactionService {
             ));
         }
         batch.commit().get();
+
+        sendNotifications(NotificationEvent.ON_APPROVE, transactions, user);
     }
 
     @Override
@@ -152,9 +136,11 @@ public class TransactionServiceImpl implements TransactionService {
     public void decline(List<String> ids, String user) {
         List<DocumentSnapshot> documents = getByIds(ids);
 
+        List<Transaction> transactions = new ArrayList<>();
         for (DocumentSnapshot document : documents) {
             Transaction transaction = Transaction.ofDoc(document);
             validateDecline(transaction, user);
+            transactions.add(transaction);
         }
 
         Date now = new Date();
@@ -167,6 +153,8 @@ public class TransactionServiceImpl implements TransactionService {
             ));
         }
         batch.commit().get();
+
+        sendNotifications(NotificationEvent.ON_DECLINE, transactions, user);
     }
 
     @Override
@@ -174,9 +162,11 @@ public class TransactionServiceImpl implements TransactionService {
     public void complete(List<String> ids, String user) {
         List<DocumentSnapshot> documents = getByIds(ids);
 
+        List<Transaction> transactions = new ArrayList<>();
         for (DocumentSnapshot document : documents) {
             Transaction transaction = Transaction.ofDoc(document);
             validateComplete(transaction, user);
+            transactions.add(transaction);
         }
 
         Date now = new Date();
@@ -189,6 +179,8 @@ public class TransactionServiceImpl implements TransactionService {
             ));
         }
         batch.commit().get();
+
+        sendNotifications(NotificationEvent.ON_COMPLETE, transactions, user);
     }
 
     @Override
@@ -314,6 +306,49 @@ public class TransactionServiceImpl implements TransactionService {
         return doc == null ? null : Transaction.ofDoc(doc);
     }
 
+    @RequiredArgsConstructor
+    private enum NotificationEvent {
+        ON_CREATE("Some transactions were created and are waiting for your approval!"),
+        ON_APPROVE("Some transactions were approved and are waiting for your payment!"),
+        ON_DECLINE("Some transactions were declined, you probably may discuss details with related partner"),
+        ON_COMPLETE("Some transaction were completed, thank you for using our application!");
+
+        private final String messageHeader;
+    }
+
+    private void sendNotifications(NotificationEvent event, List<Transaction> transactions, String userId) {
+        try {
+            doSendNotifications(event, transactions, userId);
+        } catch (Exception e) {
+            log.error("failed to send telegram notifications", e);
+        }
+    }
+
+    private void doSendNotifications(NotificationEvent event, List<Transaction> allTransactions, String userId) {
+        Map<String, List<Transaction>> byPartner = groupByPartner(allTransactions, userId);
+        Map<String, User> allUsers = userService.getAll()
+                .stream()
+                .collect(Collectors.toMap(User::getId, u -> u));
+
+        byPartner.forEach((partnerId, transactions) -> {
+            User partner = allUsers.get(partnerId);
+            Settings settings = partner.getSettings();
+            if (settings.getEnableTelegramNotifications()) {
+                String message = createMessage(event.messageHeader, transactions);
+                telegramService.sendMessage(message, partner.getTelegramId());
+            }
+        });
+    }
+
+    private static String createMessage(String header, List<Transaction> transactions) {
+        String line = "\n-------------------------------------------\n";
+        String body = transactions
+                .stream()
+                .map(Transaction::toMessage)
+                .collect(joining(line, line, line));
+        return header + body;
+    }
+
     private Map<String, Object> toMap(Transaction transaction) {
         Map<String, Object> map = new HashMap<>();
 
@@ -329,5 +364,22 @@ public class TransactionServiceImpl implements TransactionService {
         ofNullable(transaction.getUpdated()).ifPresent(v -> map.put("updated", v));
 
         return map;
+    }
+
+    public static void main(String[] args) {
+        List<Transaction> txs = new ArrayList<>();
+
+        Transaction tx=  new Transaction();
+        tx.setSender("Andrei");
+        tx.setReceiver("Anton");
+        tx.setAmount(100.00);
+        tx.setCurrency("RUR");
+        tx.setCreated(new Date());
+        tx.setDescription("lsjnfksjdnfksjdnfksjdfbskdjfbsdfsdfnsd");
+
+        txs.add(tx);
+        txs.add(tx);
+
+        System.out.println(createMessage(NotificationEvent.ON_CREATE.messageHeader, txs));
     }
 }

@@ -1,6 +1,7 @@
 package com.github.bablo_org.bablo_project.api.model.domain;
 
 import java.util.Date;
+import java.util.Optional;
 
 import com.google.cloud.firestore.DocumentSnapshot;
 import lombok.AllArgsConstructor;
@@ -35,5 +36,10 @@ public class Transaction {
                 doc.getDate("created"),
                 doc.getDate("updated")
         );
+    }
+
+    public String toMessage() {
+        return sender + " -> " + receiver + " / " + amount + " " + currency + " / " + Optional.ofNullable(updated).orElse(created)
+                + "\n" + description;
     }
 }
