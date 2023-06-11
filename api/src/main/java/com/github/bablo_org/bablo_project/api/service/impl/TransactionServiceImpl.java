@@ -334,17 +334,17 @@ public class TransactionServiceImpl implements TransactionService {
             User partner = allUsers.get(partnerId);
             Settings settings = partner.getSettings();
             if (settings.getEnableTelegramNotifications()) {
-                String message = createMessage(event.messageHeader, transactions);
+                String message = createMessage(event.messageHeader, transactions, allUsers);
                 telegramService.sendMessage(message, partner.getTelegramId());
             }
         });
     }
 
-    private static String createMessage(String header, List<Transaction> transactions) {
+    private static String createMessage(String header, List<Transaction> transactions, Map<String, User> users) {
         String line = "\n-------------------------------------------\n";
         String body = transactions
                 .stream()
-                .map(Transaction::toMessage)
+                .map(tx -> tx.toMessage(users))
                 .collect(joining(line, line, line));
         return header + body;
     }
@@ -364,22 +364,5 @@ public class TransactionServiceImpl implements TransactionService {
         ofNullable(transaction.getUpdated()).ifPresent(v -> map.put("updated", v));
 
         return map;
-    }
-
-    public static void main(String[] args) {
-        List<Transaction> txs = new ArrayList<>();
-
-        Transaction tx=  new Transaction();
-        tx.setSender("Andrei");
-        tx.setReceiver("Anton");
-        tx.setAmount(100.00);
-        tx.setCurrency("RUR");
-        tx.setCreated(new Date());
-        tx.setDescription("lsjnfksjdnfksjdnfksjdfbskdjfbsdfsdfnsd");
-
-        txs.add(tx);
-        txs.add(tx);
-
-        System.out.println(createMessage(NotificationEvent.ON_CREATE.messageHeader, txs));
     }
 }

@@ -1,6 +1,7 @@
 package com.github.bablo_org.bablo_project.api.model.domain;
 
 import java.util.Date;
+import java.util.Map;
 import java.util.Optional;
 
 import com.google.cloud.firestore.DocumentSnapshot;
@@ -38,8 +39,8 @@ public class Transaction {
         );
     }
 
-    public String toMessage() {
-        return sender + " -> " + receiver + " / " + amount + " " + currency + " / " + Optional.ofNullable(updated).orElse(created)
+    public String toMessage(Map<String, User> users) {
+        return users.get(sender).getName() + " -> " + users.get(receiver).getName() + " / " + amount + " " + currency + " / " + Optional.ofNullable(updated).orElse(created)
                 + "\n" + description;
     }
 }
