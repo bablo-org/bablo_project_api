@@ -309,7 +309,7 @@ public class TransactionServiceImpl implements TransactionService {
     @RequiredArgsConstructor
     private enum NotificationEvent {
         ON_CREATE("Some transactions were created and are waiting for your approval!"),
-        ON_APPROVE("Some transactions were approved and are waiting for your payment!"),
+        ON_APPROVE("Some transactions were approved and are waiting for partner's payment!"),
         ON_DECLINE("Some transactions were declined, you probably may discuss details with related partner"),
         ON_COMPLETE("Some transaction were completed, thank you for using our application!");
 
