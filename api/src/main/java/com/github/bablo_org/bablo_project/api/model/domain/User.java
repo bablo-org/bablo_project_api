@@ -36,7 +36,7 @@ public class User {
                 doc.getString("avatar"),
                 doc.getBoolean("isActive"),
                 doc.getDate("created"),
-                doc.getDate("updated"),
+                ofNullable(doc.getUpdateTime()).map(Timestamp::toDate).orElse(null),
                 UserPrivateData.ofMap((Map<String, Object>) doc.get("privateData"))
         );
     }
