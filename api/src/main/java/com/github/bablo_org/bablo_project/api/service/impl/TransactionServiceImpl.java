@@ -332,10 +332,10 @@ public class TransactionServiceImpl implements TransactionService {
 
         byPartner.forEach((partnerId, transactions) -> {
             User partner = allUsers.get(partnerId);
-            Settings settings = partner.getSettings();
+            Settings settings = partner.getPrivateData().getSettings();
             if (settings.getEnableTelegramNotifications()) {
                 String message = createMessage(event.messageHeader, transactions, allUsers);
-                telegramService.sendMessage(message, partner.getTelegramId());
+                telegramService.sendMessage(message, partner.getPrivateData().getTelegramId());
             }
         });
     }

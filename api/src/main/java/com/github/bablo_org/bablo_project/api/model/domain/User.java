@@ -1,15 +1,10 @@
 package com.github.bablo_org.bablo_project.api.model.domain;
 
 import static java.util.Optional.ofNullable;
-import static java.util.stream.Collectors.toSet;
 
-import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import com.github.bablo_org.bablo_project.api.utils.FirestoreUtils;
 import com.google.cloud.Timestamp;
 import com.google.cloud.firestore.DocumentSnapshot;
 import lombok.AccessLevel;
@@ -27,15 +22,11 @@ public class User {
     private String name;
     private String email;
     private String avatar;
-    private String telegramUser;
-    private String telegramId;
-    @Setter(AccessLevel.NONE)
+    private boolean isActive;
     private Date created;
     @Setter(AccessLevel.NONE)
     private Date updated;
-    private Settings settings;
-    private Set<Partner> partners;
-    private boolean isActive;
+    private UserPrivateData privateData;
 
     public static User ofDoc(DocumentSnapshot doc) {
         return new User(
@@ -43,32 +34,10 @@ public class User {
                 doc.getString("name"),
                 doc.getString("email"),
                 doc.getString("avatar"),
-                doc.getString("telegramUser"),
-                doc.getString("telegramId"),
+                doc.getBoolean("isActive"),
                 doc.getDate("created"),
-                ofNullable(doc.getUpdateTime())
-                        .map(Timestamp::toDate)
-                        .orElse(null),
-                Settings.ofDoc(doc),
-                extractPartners(doc),
-                ofNullable(doc.getBoolean("isActive"))
-                        .orElse(true)
+                doc.getDate("updated"),
+                UserPrivateData.ofMap((Map<String, Object>) doc.get("privateData"))
         );
-    }
-
-    private static Set<Partner> extractPartners(DocumentSnapshot doc) {
-        List<Map<String, Object>> partners = (List<Map<String, Object>>) doc.get("partners");
-
-        if (partners == null) {
-            return Collections.emptySet();
-        }
-
-        return partners
-                .stream()
-                .map(fields -> new Partner(
-                        (String) fields.get("id"),
-                        FirestoreUtils.listToSet(fields.get("tags"))
-                ))
-                .collect(toSet());
     }
 }

@@ -1,11 +1,8 @@
 package com.github.bablo_org.bablo_project.api.model.domain;
 
-import static java.util.Collections.emptyList;
-
 import java.util.List;
 import java.util.Map;
 
-import com.google.cloud.firestore.DocumentSnapshot;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,16 +15,10 @@ public class Settings {
     private Boolean enableTelegramNotifications;
 
     /** setting is a field of 'user' document */
-    public static Settings ofDoc(DocumentSnapshot doc) {
-        Map<String, Object> settings = (Map<String, Object>) doc.get("settings");
-
-        if (settings == null) {
-            return new Settings(emptyList(), false);
-        }
-
+    public static Settings ofMap(Map<String, Object> map) {
         return new Settings(
-                (List<String>) settings.get("favoriteCurrencies"),
-                (Boolean) settings.get("enableTelegramNotifications")
+                (List<String>) map.get("favoriteCurrencies"),
+                (Boolean) map.get("enableTelegramNotifications")
         );
     }
 }
