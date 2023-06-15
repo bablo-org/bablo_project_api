@@ -6,7 +6,6 @@ import static com.google.cloud.firestore.Filter.equalTo;
 import static com.google.cloud.firestore.Filter.inArray;
 import static com.google.cloud.firestore.Filter.or;
 import static java.util.Optional.ofNullable;
-import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 
 import java.util.ArrayList;
@@ -175,15 +174,6 @@ public class TransactionServiceImpl implements TransactionService {
         batch.commit().get();
 
         notificationService.onTransactionsCompleted(transactions, user);
-    }
-
-    @Override
-    public Map<String, List<Transaction>> groupByPartner(List<Transaction> transactions, String user) {
-        return transactions
-                .stream()
-                .collect(groupingBy(
-                        tx -> tx.getSender().equals(user) ? tx.getReceiver() : tx.getSender())
-                );
     }
 
     @SneakyThrows
