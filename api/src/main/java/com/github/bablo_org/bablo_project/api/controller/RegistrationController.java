@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(value = "/registration", produces = MediaType.APPLICATION_JSON_VALUE)
-public class RegistrationController {
+public class RegistrationController extends BaseController {
 
     private final RegistrationService service;
 

@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "/jobs", produces = MediaType.APPLICATION_JSON_VALUE)
-public class JobController {
+public class JobController extends BaseController {
 
     private final JobService service;
 
