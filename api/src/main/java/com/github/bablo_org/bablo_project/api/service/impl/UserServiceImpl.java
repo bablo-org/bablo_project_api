@@ -100,9 +100,9 @@ public class UserServiceImpl implements UserService {
             firestore.collection(DB_COLLECTION_NAME)
                     .document(userId)
                     .update(
-                            FieldPath.of("settings", "enableTelegramNotifications"),
+                            FieldPath.of("privateData", "settings", "enableTelegramNotifications"),
                             settings.getEnableTelegramNotifications(),
-                            FieldPath.of("settings", "favoriteCurrencies"),
+                            FieldPath.of("privateData", "settings", "favoriteCurrencies"),
                             settings.getFavoriteCurrencies()
                     )
                     .get();
@@ -112,7 +112,7 @@ public class UserServiceImpl implements UserService {
             firestore.collection(DB_COLLECTION_NAME)
                     .document(userId)
                     .update(
-                            FieldPath.of("settings", "enableTelegramNotifications"),
+                            FieldPath.of("privateData", "settings", "enableTelegramNotifications"),
                             settings.getEnableTelegramNotifications()
                     )
                     .get();
@@ -122,7 +122,7 @@ public class UserServiceImpl implements UserService {
             firestore.collection(DB_COLLECTION_NAME)
                     .document(userId)
                     .update(
-                            FieldPath.of("settings", "favoriteCurrencies"), settings.getFavoriteCurrencies()
+                            FieldPath.of("privateData", "settings", "favoriteCurrencies"), settings.getFavoriteCurrencies()
                     )
                     .get();
         }
@@ -153,9 +153,9 @@ public class UserServiceImpl implements UserService {
         firestore.collection(DB_COLLECTION_NAME)
                 .document(userId)
                 .update(
-                        FieldPath.of("telegramUser"), telegramUser,
-                        FieldPath.of("telegramId"), tgId,
-                        FieldPath.of("settings", "enableTelegramNotifications"), true
+                        FieldPath.of("privateData", "telegramUser"), telegramUser,
+                        FieldPath.of("privateData", "telegramId"), tgId,
+                        FieldPath.of("privateData", "settings", "enableTelegramNotifications"), true
                 )
                 .get();
     }
