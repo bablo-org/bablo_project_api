@@ -24,6 +24,18 @@ public class Transaction {
     private Date created;
     private Date updated;
 
+    public String getPartner(String currentUser) {
+        if (sender.equals(currentUser)) {
+            return receiver;
+        }
+
+        if (receiver.equals(currentUser)) {
+            return sender;
+        }
+
+        throw new RuntimeException("user is not related to this transaction");
+    }
+
     public static Transaction ofDoc(DocumentSnapshot doc) {
         return new Transaction(
                 doc.getId(),
@@ -37,10 +49,5 @@ public class Transaction {
                 doc.getDate("created"),
                 doc.getDate("updated")
         );
-    }
-
-    public String toMessage(Map<String, User> users) {
-        return users.get(sender).getName() + " -> " + users.get(receiver).getName() + " / " + amount + " " + currency + " / " + Optional.ofNullable(updated).orElse(created)
-                + "\n" + description;
     }
 }

@@ -2,6 +2,7 @@ package com.github.bablo_org.bablo_project.api.service.impl;
 
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 
 import java.io.ByteArrayInputStream;
@@ -23,6 +24,7 @@ import com.github.bablo_org.bablo_project.api.service.UserService;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.FieldPath;
+import com.google.cloud.firestore.Filter;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobInfo;
@@ -60,6 +62,19 @@ public class UserServiceImpl implements UserService {
                 .get();
 
         return doc.exists() ? User.ofDoc(doc) : null;
+    }
+
+    @Override
+    @SneakyThrows
+    public Map<String, User> getByIds(String... ids) {
+        return firestore.collection(DB_COLLECTION_NAME)
+                .where(Filter.inArray(FieldPath.documentId(), ids))
+                .get()
+                .get()
+                .getDocuments()
+                .stream()
+                .map(User::ofDoc)
+                .collect(toMap(user -> user.getId(), user -> user));
     }
 
     @Override

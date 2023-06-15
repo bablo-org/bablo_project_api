@@ -1,7 +1,6 @@
 package com.github.bablo_org.bablo_project.api.service;
 
 import java.util.List;
-import java.util.Map;
 
 import com.github.bablo_org.bablo_project.api.model.domain.Transaction;
 
@@ -18,6 +17,4 @@ public interface TransactionService {
     void decline(List<String> ids, String user);
 
     void complete(List<String> ids, String user);
-
-    Map<String, List<Transaction>> groupByPartner(List<Transaction> transactions, String user);
 }

@@ -7,7 +7,6 @@ import static com.google.cloud.firestore.Filter.inArray;
 import static com.google.cloud.firestore.Filter.or;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 import java.util.ArrayList;
@@ -15,13 +14,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
-import com.github.bablo_org.bablo_project.api.model.domain.Settings;
 import com.github.bablo_org.bablo_project.api.model.domain.Transaction;
 import com.github.bablo_org.bablo_project.api.model.domain.TransactionStatus;
-import com.github.bablo_org.bablo_project.api.model.domain.User;
-import com.github.bablo_org.bablo_project.api.service.TelegramService;
+import com.github.bablo_org.bablo_project.api.service.NotificationService;
 import com.github.bablo_org.bablo_project.api.service.TransactionService;
 import com.google.cloud.firestore.CollectionReference;
 import com.google.cloud.firestore.DocumentReference;
@@ -44,9 +40,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     private final Firestore firestore;
 
-    private final UserServiceImpl userService;
-
-    private final TelegramService telegramService;
+    private final NotificationService notificationService;
 
     @Override
     public Transaction getById(String id, String user) {
@@ -102,7 +96,7 @@ public class TransactionServiceImpl implements TransactionService {
         });
         batch.commit().get();
 
-        sendNotifications(NotificationEvent.ON_CREATE, transactions, user);
+        notificationService.onTransactionsNew(transactions, user);
     }
 
     @Override
@@ -128,7 +122,7 @@ public class TransactionServiceImpl implements TransactionService {
         }
         batch.commit().get();
 
-        sendNotifications(NotificationEvent.ON_APPROVE, transactions, user);
+        notificationService.onTransactionsApproved(transactions, user);
     }
 
     @Override
@@ -154,7 +148,7 @@ public class TransactionServiceImpl implements TransactionService {
         }
         batch.commit().get();
 
-        sendNotifications(NotificationEvent.ON_DECLINE, transactions, user);
+        notificationService.onTransactionsDeclined(transactions, user);
     }
 
     @Override
@@ -180,7 +174,7 @@ public class TransactionServiceImpl implements TransactionService {
         }
         batch.commit().get();
 
-        sendNotifications(NotificationEvent.ON_COMPLETE, transactions, user);
+        notificationService.onTransactionsCompleted(transactions, user);
     }
 
     @Override
@@ -304,49 +298,6 @@ public class TransactionServiceImpl implements TransactionService {
     private Transaction toModel(DocumentReference ref) {
         DocumentSnapshot doc = ref.get().get();
         return doc == null ? null : Transaction.ofDoc(doc);
-    }
-
-    @RequiredArgsConstructor
-    private enum NotificationEvent {
-        ON_CREATE("Some transactions were created and are waiting for your approval!"),
-        ON_APPROVE("Some transactions were approved and are waiting for partner's payment!"),
-        ON_DECLINE("Some transactions were declined, you probably may discuss details with related partner"),
-        ON_COMPLETE("Some transaction were completed, thank you for using our application!");
-
-        private final String messageHeader;
-    }
-
-    private void sendNotifications(NotificationEvent event, List<Transaction> transactions, String userId) {
-        try {
-            doSendNotifications(event, transactions, userId);
-        } catch (Exception e) {
-            log.error("failed to send telegram notifications", e);
-        }
-    }
-
-    private void doSendNotifications(NotificationEvent event, List<Transaction> allTransactions, String userId) {
-        Map<String, List<Transaction>> byPartner = groupByPartner(allTransactions, userId);
-        Map<String, User> allUsers = userService.getAll()
-                .stream()
-                .collect(Collectors.toMap(User::getId, u -> u));
-
-        byPartner.forEach((partnerId, transactions) -> {
-            User partner = allUsers.get(partnerId);
-            Settings settings = partner.getPrivateData().getSettings();
-            if (settings.getEnableTelegramNotifications()) {
-                String message = createMessage(event.messageHeader, transactions, allUsers);
-                telegramService.sendMessage(message, partner.getPrivateData().getTelegramId());
-            }
-        });
-    }
-
-    private static String createMessage(String header, List<Transaction> transactions, Map<String, User> users) {
-        String line = "\n-------------------------------------------\n";
-        String body = transactions
-                .stream()
-                .map(tx -> tx.toMessage(users))
-                .collect(joining(line, line, line));
-        return header + body;
     }
 
     private Map<String, Object> toMap(Transaction transaction) {

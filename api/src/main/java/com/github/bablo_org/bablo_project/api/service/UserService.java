@@ -14,6 +14,8 @@ public interface UserService {
     @Nullable
     User getById(String id);
 
+    Map<String, User> getByIds(String... ids);
+
     List<User> getAll();
 
     StorageFile uploadAvatar(String fileName, byte[] content, String user);
