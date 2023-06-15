@@ -3,6 +3,7 @@ package com.github.bablo_org.bablo_project.api.service.impl;
 import java.util.Map;
 
 import com.github.bablo_org.bablo_project.api.model.domain.User;
+import com.github.bablo_org.bablo_project.api.model.domain.UserPrivateData;
 import com.github.bablo_org.bablo_project.api.service.RegistrationService;
 import com.github.bablo_org.bablo_project.api.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +20,9 @@ public class RegistrationServiceImpl implements RegistrationService {
         User user = userService.getById(id);
 
         if (user == null) {
-            userService.addOrUpdate(id, Map.of("email", email, "isActive", true));
+            UserPrivateData privateData = new UserPrivateData();
+            privateData.setEmail(email);
+            userService.addOrUpdate(id, Map.of("privateData", privateData, "isActive", true));
             return;
         }
 

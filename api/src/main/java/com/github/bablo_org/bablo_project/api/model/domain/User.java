@@ -20,7 +20,6 @@ public class User {
     @Setter(AccessLevel.NONE)
     private String id;
     private String name;
-    private String email;
     private String avatar;
     private boolean isActive;
     private Date created;
@@ -32,7 +31,6 @@ public class User {
         return new User(
                 doc.getId(),
                 doc.getString("name"),
-                doc.getString("email"),
                 doc.getString("avatar"),
                 ofNullable(doc.getBoolean("isActive")).orElse(true),
                 doc.getDate("created"),
