@@ -7,8 +7,8 @@ import java.util.List;
 
 import com.github.bablo_org.bablo_project.api.model.domain.Settings;
 import com.github.bablo_org.bablo_project.api.model.domain.StorageFile;
-import com.github.bablo_org.bablo_project.api.model.dto.UpdateUserProfileRequest;
 import com.github.bablo_org.bablo_project.api.model.domain.User;
+import com.github.bablo_org.bablo_project.api.model.dto.UpdateUserProfileRequest;
 import com.github.bablo_org.bablo_project.api.service.UserService;
 import com.google.firebase.auth.FirebaseToken;
 import lombok.RequiredArgsConstructor;

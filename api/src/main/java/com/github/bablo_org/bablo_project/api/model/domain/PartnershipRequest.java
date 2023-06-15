@@ -3,7 +3,6 @@ package com.github.bablo_org.bablo_project.api.model.domain;
 import static java.util.Optional.ofNullable;
 
 import java.util.Date;
-import java.util.Map;
 
 import com.google.cloud.Timestamp;
 import com.google.cloud.firestore.DocumentSnapshot;

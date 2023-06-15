@@ -1,8 +1,6 @@
 package com.github.bablo_org.bablo_project.api.model.domain;
 
 import java.util.Date;
-import java.util.Map;
-import java.util.Optional;
 
 import com.google.cloud.firestore.DocumentSnapshot;
 import lombok.AllArgsConstructor;
