@@ -2,6 +2,7 @@ package com.github.bablo_org.bablo_project.api.service.impl;
 
 import static com.google.cloud.firestore.Filter.equalTo;
 import static com.google.cloud.firestore.Filter.or;
+import static java.util.Objects.requireNonNull;
 
 import java.util.List;
 import java.util.Map;
@@ -10,7 +11,10 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.github.bablo_org.bablo_project.api.model.domain.PartnershipRequest;
+import com.github.bablo_org.bablo_project.api.model.domain.User;
+import com.github.bablo_org.bablo_project.api.service.NotificationService;
 import com.github.bablo_org.bablo_project.api.service.PartnershipRequestService;
+import com.github.bablo_org.bablo_project.api.service.UserService;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +31,10 @@ public class PartnershipRequestServiceImpl implements PartnershipRequestService 
 
     private final Firestore firestore;
 
+    private final UserService userService;
+
+    private final NotificationService notificationService;
+
     @Override
     @SneakyThrows
     public List<PartnershipRequest> getRelated(String currentUser) {
@@ -42,25 +50,34 @@ public class PartnershipRequestServiceImpl implements PartnershipRequestService 
 
     @Override
     @SneakyThrows
-    public void create(String currentUser, String partner) {
-        if (Objects.equals(currentUser, partner)) {
+    public void create(String currentUser, String partnerId) {
+        if (Objects.equals(currentUser, partnerId)) {
             throw new RuntimeException("user can't send request to himself");
         }
 
         List<PartnershipRequest> relatedWithPartner = getRelated(currentUser)
                 .stream()
-                .filter(req -> Objects.equals(partner, req.getSender()) || Objects.equals(partner, req.getReceiver()))
+                .filter(req -> Objects.equals(partnerId, req.getSender()) || Objects.equals(partnerId, req.getReceiver()))
                 .collect(Collectors.toList());
 
         if (!relatedWithPartner.isEmpty()) {
             throw new RuntimeException("there are similar requests already exist: " + relatedWithPartner);
         }
 
+        Map<String, User> users = userService.getByIds(currentUser, partnerId);
+        User sender = requireNonNull(users.get(currentUser), "user must exists: " + currentUser);
+        User receiver = requireNonNull(users.get(partnerId), "user must exists: " + partnerId);
+
+        if (sender.getNetwork().isPartner(partnerId)) {
+            throw new RuntimeException("user is your partner already");
+        }
+
         firestore.collection(COLLECTION_NAME)
                 .document()
-                .set(Map.of("sender", currentUser, "receiver", partner))
+                .set(Map.of("sender", currentUser, "receiver", partnerId))
                 .get();
-        log.info("partnership request has been created: " + currentUser + " -> " + partner);
+        notificationService.onPartnershipRequestNew(sender, receiver);
+        log.info("partnership request has been created: " + currentUser + " -> " + partnerId);
     }
 
     @Override
@@ -73,10 +90,13 @@ public class PartnershipRequestServiceImpl implements PartnershipRequestService 
             throw new RuntimeException("current user is not a receiver of this request");
         }
 
+        userService.addPartner(currentUser, request.getSender());
         firestore.collection(COLLECTION_NAME)
                 .document(requestId)
                 .delete()
                 .get();
+
+        notificationService.onPartnershipRequestAccepted(request, currentUser);
         log.info("partnership request has been accepted: " + requestId);
     }
 
@@ -94,6 +114,8 @@ public class PartnershipRequestServiceImpl implements PartnershipRequestService 
                 .document(requestId)
                 .delete()
                 .get();
+
+        notificationService.onPartnershipRequestDeclined(request, currentUser);
         log.info("partnership request has been declined: " + requestId);
     }
 

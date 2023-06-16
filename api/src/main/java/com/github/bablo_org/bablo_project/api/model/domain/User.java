@@ -4,6 +4,7 @@ import static java.util.Optional.ofNullable;
 
 import java.util.Date;
 import java.util.Map;
+import java.util.Optional;
 
 import com.google.cloud.Timestamp;
 import com.google.cloud.firestore.DocumentSnapshot;
@@ -37,5 +38,11 @@ public class User {
                 ofNullable(doc.getUpdateTime()).map(Timestamp::toDate).orElse(null),
                 UserPrivateData.ofMap((Map<String, Object>) doc.get("privateData"))
         );
+    }
+
+    public Network getNetwork() {
+        return Optional.ofNullable(privateData)
+                .map(UserPrivateData::getNetwork)
+                .orElse(new Network());
     }
 }

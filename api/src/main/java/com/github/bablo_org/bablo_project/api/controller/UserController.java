@@ -8,6 +8,7 @@ import java.util.List;
 import com.github.bablo_org.bablo_project.api.model.domain.Settings;
 import com.github.bablo_org.bablo_project.api.model.domain.StorageFile;
 import com.github.bablo_org.bablo_project.api.model.domain.User;
+import com.github.bablo_org.bablo_project.api.model.dto.UpdatePartnerTagsRequest;
 import com.github.bablo_org.bablo_project.api.model.dto.UpdateUserProfileRequest;
 import com.github.bablo_org.bablo_project.api.service.UserService;
 import com.google.firebase.auth.FirebaseToken;
@@ -59,6 +60,15 @@ public class UserController extends BaseController {
     @PutMapping("/updateSettings")
     ResponseEntity<String> updateSettings(@RequestBody Settings settings, @RequestAttribute(USER_TOKEN) FirebaseToken userToken) {
         service.updateSettings(settings, userToken.getUid());
+        return ResponseEntity
+                .ok()
+                .build();
+    }
+
+    @PutMapping("/updatePartnerTags")
+    ResponseEntity<String> updateSettings(@RequestBody UpdatePartnerTagsRequest request,
+                                          @RequestAttribute(USER_TOKEN) FirebaseToken userToken) {
+        service.updatePartnerTags(userToken.getUid(), request.getPartnerId(), request.getTags());
         return ResponseEntity
                 .ok()
                 .build();

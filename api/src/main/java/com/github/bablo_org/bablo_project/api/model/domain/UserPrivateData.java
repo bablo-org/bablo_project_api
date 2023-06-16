@@ -14,9 +14,10 @@ public class UserPrivateData {
     private String telegramUser;
     private String telegramId;
     private Settings settings;
+    private Network network;
 
     public static UserPrivateData empty() {
-        return new UserPrivateData("", "", "", Settings.empty());
+        return new UserPrivateData("", "", "", Settings.empty(), new Network());
     }
 
     public static UserPrivateData ofMap(Map<String, Object> map) {
@@ -26,7 +27,8 @@ public class UserPrivateData {
                        (String) map.get("email"),
                        (String) map.get("telegramUser"),
                        (String) map.get("telegramId"),
-                       Settings.ofMap((Map<String, Object>) map.get("settings"))
+                       Settings.ofMap((Map<String, Object>) map.get("settings")),
+                       Network.ofMap((Map<String, Object>) map.get("network"))
                );
     }
 }

@@ -27,4 +27,8 @@ public interface UserService {
     void updateSettings(Settings settings, String userId);
 
     void connectTelegram(String telegramUser, String userId);
+
+    void addPartner(String userId, String partnerId);
+
+    void updatePartnerTags(String userId, String partnerId, List<String> tags);
 }

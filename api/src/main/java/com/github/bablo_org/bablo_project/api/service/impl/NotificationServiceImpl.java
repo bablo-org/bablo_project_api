@@ -45,11 +45,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public void onPartnershipRequestNew(PartnershipRequest request, String currentUser) {
-        Map<String, User> relatedUsers = userService.getByIds(request.getSender(), request.getReceiver());
-        User receiver = relatedUsers.get(request.getReceiver());
-        User sender = relatedUsers.get(request.getSender());
-
+    public void onPartnershipRequestNew(User sender, User receiver) {
         if (isTelegramNotificationsEnabled(receiver)) {
             telegramService.sendMessage(
                     "New partnership request from: " + sender.getName(),

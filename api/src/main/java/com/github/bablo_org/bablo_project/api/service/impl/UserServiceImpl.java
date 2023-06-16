@@ -1,12 +1,14 @@
 package com.github.bablo_org.bablo_project.api.service.impl;
 
 import static java.util.Comparator.comparing;
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -14,6 +16,7 @@ import java.util.stream.StreamSupport;
 import javax.annotation.Nullable;
 
 import com.github.bablo_org.bablo_project.api.model.domain.Currency;
+import com.github.bablo_org.bablo_project.api.model.domain.Network;
 import com.github.bablo_org.bablo_project.api.model.domain.Settings;
 import com.github.bablo_org.bablo_project.api.model.domain.StorageFile;
 import com.github.bablo_org.bablo_project.api.model.domain.User;
@@ -21,11 +24,13 @@ import com.github.bablo_org.bablo_project.api.model.dto.UpdateUserProfileRequest
 import com.github.bablo_org.bablo_project.api.service.CurrencyService;
 import com.github.bablo_org.bablo_project.api.service.TelegramService;
 import com.github.bablo_org.bablo_project.api.service.UserService;
+import com.google.cloud.firestore.CollectionReference;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.FieldPath;
 import com.google.cloud.firestore.Filter;
 import com.google.cloud.firestore.Firestore;
+import com.google.cloud.firestore.WriteBatch;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.Storage;
@@ -68,7 +73,7 @@ public class UserServiceImpl implements UserService {
     @SneakyThrows
     public Map<String, User> getByIds(String... ids) {
         return firestore.collection(DB_COLLECTION_NAME)
-                .where(Filter.inArray(FieldPath.documentId(), ids))
+                .where(Filter.inArray(FieldPath.documentId(), Arrays.asList(ids)))
                 .get()
                 .get()
                 .getDocuments()
@@ -175,6 +180,43 @@ public class UserServiceImpl implements UserService {
                 .get();
     }
 
+    @Override
+    public void addPartner(String userId, String partnerId) {
+        Map<String, User> users = getByIds(userId, partnerId);
+
+        User user = requireNonNull(users.get(userId), "user must exists");
+        User partner = requireNonNull(users.get(partnerId), "partner must exists");
+
+        Network userNetwork = user.getNetwork();
+        Network partnerNetwork = partner.getNetwork();
+
+        if (userNetwork.isPartner(partnerId)) {
+            throw new RuntimeException("this user is already your partner");
+        }
+
+        if (partnerNetwork.isPartner(userId)) {
+            userNetwork.addPartner(partnerId);
+            updateNetworks(Map.of(userId, userNetwork));
+        } else {
+            partnerNetwork.addPartner(userId);
+            userNetwork.addPartner(partnerId);
+            updateNetworks(Map.of(userId, userNetwork, partnerId, partnerNetwork));
+        }
+    }
+
+    @Override
+    public void updatePartnerTags(String userId, String partnerId, List<String> tags) {
+        User user = requireNonNull(getById(userId), "user must exists");
+
+        Network network = user.getNetwork();
+        if (!network.isPartner(partnerId)) {
+            throw new RuntimeException("this user is not your partner");
+        }
+        network.updateTags(partnerId, tags);
+
+        updateNetworks(Map.of(userId, network));
+    }
+
     @SneakyThrows
     private void validateSettings(Settings settings) {
         List<String> currencyIds = settings.getFavoriteCurrencies();
@@ -213,5 +255,16 @@ public class UserServiceImpl implements UserService {
         return firestore
                 .collection(DB_COLLECTION_NAME)
                 .document(id);
+    }
+
+    @SneakyThrows
+    private void updateNetworks(Map<String, Network> userIdToNetwork) {
+        WriteBatch batch = firestore.batch();
+        CollectionReference collection = firestore.collection(DB_COLLECTION_NAME);
+
+        userIdToNetwork.forEach((userId, network) -> {
+            collection.document(userId).update(FieldPath.of("privateData", "network"), network.getPartners());
+        });
+        batch.commit().get();
     }
 }
