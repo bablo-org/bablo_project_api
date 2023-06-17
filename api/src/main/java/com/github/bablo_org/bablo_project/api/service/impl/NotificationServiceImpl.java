@@ -91,7 +91,7 @@ public class NotificationServiceImpl implements NotificationService {
         byPartner.forEach((partnerId, txList) -> {
             User partner = users.get(partnerId);
             if (isTelegramNotificationsEnabled(partner)) {
-                String message = txToMessage(header, transactions, users);
+                String message = txToMessage(header, txList, users);
                 telegramService.sendMessage(message, partner.getPrivateData().getTelegramId());
             }
         });
