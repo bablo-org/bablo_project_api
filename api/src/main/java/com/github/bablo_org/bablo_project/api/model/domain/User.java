@@ -40,7 +40,7 @@ public class User {
         );
     }
 
-    public Network getNetwork() {
+    public Network simpleGetNetwork() {
         return Optional.ofNullable(privateData)
                 .map(UserPrivateData::getNetwork)
                 .orElse(new Network());

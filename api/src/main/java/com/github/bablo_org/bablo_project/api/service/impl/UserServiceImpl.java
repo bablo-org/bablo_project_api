@@ -1,5 +1,7 @@
 package com.github.bablo_org.bablo_project.api.service.impl;
 
+import static com.google.cloud.firestore.FieldPath.documentId;
+import static com.google.cloud.firestore.Filter.inArray;
 import static java.util.Comparator.comparing;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
@@ -8,9 +10,12 @@ import static java.util.stream.Collectors.toSet;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.StreamSupport;
 import javax.annotation.Nullable;
@@ -28,7 +33,6 @@ import com.google.cloud.firestore.CollectionReference;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.FieldPath;
-import com.google.cloud.firestore.Filter;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.WriteBatch;
 import com.google.cloud.storage.Blob;
@@ -73,7 +77,7 @@ public class UserServiceImpl implements UserService {
     @SneakyThrows
     public Map<String, User> getByIds(String... ids) {
         return firestore.collection(DB_COLLECTION_NAME)
-                .where(Filter.inArray(FieldPath.documentId(), Arrays.asList(ids)))
+                .where(inArray(documentId(), Arrays.asList(ids)))
                 .get()
                 .get()
                 .getDocuments()
@@ -86,6 +90,34 @@ public class UserServiceImpl implements UserService {
     @SneakyThrows
     public List<User> getAll() {
         return firestore.collection(DB_COLLECTION_NAME)
+                .get()
+                .get()
+                .getDocuments()
+                .stream()
+                .map(User::ofDoc)
+                .collect(toList());
+    }
+
+    @Override
+    @SneakyThrows
+    public List<User> getUserWithPartners(String userId) {
+        User user = requireNonNull(getById(userId), "user must exists");
+
+        List<String> partnerIds = Optional.of(user)
+                .map(User::simpleGetNetwork)
+                .map(Network::getPartners)
+                .map(Map::keySet)
+                .map(ArrayList::new)
+                .orElse(null);
+
+        if (partnerIds == null) {
+            return Collections.singletonList(user);
+        } else {
+            partnerIds.add(userId);
+        }
+
+        return firestore.collection(DB_COLLECTION_NAME)
+                .where(inArray(documentId(), partnerIds))
                 .get()
                 .get()
                 .getDocuments()
@@ -142,7 +174,8 @@ public class UserServiceImpl implements UserService {
             firestore.collection(DB_COLLECTION_NAME)
                     .document(userId)
                     .update(
-                            FieldPath.of("privateData", "settings", "favoriteCurrencies"), settings.getFavoriteCurrencies()
+                            FieldPath.of("privateData", "settings", "favoriteCurrencies"),
+                            settings.getFavoriteCurrencies()
                     )
                     .get();
         }
@@ -187,8 +220,8 @@ public class UserServiceImpl implements UserService {
         User user = requireNonNull(users.get(userId), "user must exists");
         User partner = requireNonNull(users.get(partnerId), "partner must exists");
 
-        Network userNetwork = user.getNetwork();
-        Network partnerNetwork = partner.getNetwork();
+        Network userNetwork = user.simpleGetNetwork();
+        Network partnerNetwork = partner.simpleGetNetwork();
 
         if (userNetwork.isPartner(partnerId)) {
             throw new RuntimeException("this user is already your partner");
@@ -208,7 +241,7 @@ public class UserServiceImpl implements UserService {
     public void updatePartnerTags(String userId, String partnerId, List<String> tags) {
         User user = requireNonNull(getById(userId), "user must exists");
 
-        Network network = user.getNetwork();
+        Network network = user.simpleGetNetwork();
         if (!network.isPartner(partnerId)) {
             throw new RuntimeException("this user is not your partner");
         }

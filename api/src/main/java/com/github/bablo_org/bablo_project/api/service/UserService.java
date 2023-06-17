@@ -18,6 +18,8 @@ public interface UserService {
 
     List<User> getAll();
 
+    List<User> getUserWithPartners(String userId);
+
     StorageFile uploadAvatar(String fileName, byte[] content, String user);
 
     void addOrUpdate(String id, Map<String, Object> fields);

@@ -33,10 +33,19 @@ public class UserController extends BaseController {
 
     private final UserService service;
 
+    public enum Filter {
+        partners,
+        all
+    }
+
     @GetMapping
     @ResponseBody
-    List<User> getAll() {
-        return service.getAll();
+    List<User> getAll(@RequestParam(name = "filter", defaultValue = "all") Filter scope,
+                      @RequestAttribute(USER_TOKEN) FirebaseToken userToken) {
+        List<User> users = scope == Filter.partners
+                           ? service.getUserWithPartners(userToken.getUid())
+                           : service.getAll();
+        return hidePrivateData(users, userToken.getUid());
     }
 
     @PutMapping("/connectTelegram/{telegramUser}")
@@ -79,5 +88,14 @@ public class UserController extends BaseController {
                              @RequestBody String base64Content,
                              @RequestAttribute(USER_TOKEN) FirebaseToken userToken) {
         return service.uploadAvatar(fileName, Base64.getDecoder().decode(base64Content), userToken.getUid());
+    }
+
+    List<User> hidePrivateData(List<User> users, String currentUserId) {
+        for (User user : users) {
+            if (!user.getId().equals(currentUserId)) {
+                user.setPrivateData(null);
+            }
+        }
+        return users;
     }
 }

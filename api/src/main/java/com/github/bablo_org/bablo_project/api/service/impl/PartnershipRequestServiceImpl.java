@@ -68,7 +68,7 @@ public class PartnershipRequestServiceImpl implements PartnershipRequestService 
         User sender = requireNonNull(users.get(currentUser), "user must exists: " + currentUser);
         User receiver = requireNonNull(users.get(partnerId), "user must exists: " + partnerId);
 
-        if (sender.getNetwork().isPartner(partnerId)) {
+        if (sender.simpleGetNetwork().isPartner(partnerId)) {
             throw new RuntimeException("user is your partner already");
         }
 
