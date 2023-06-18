@@ -40,9 +40,9 @@ public class AuthFilter implements Filter {
         HttpServletResponse res = (HttpServletResponse) response;
 
         try {
-            if (isJob(req) && false) {
+            if (isJob(req)) {
                 checkJobAuth(req);
-            } else if (isProtectedUserRequest(req) && false) {
+            } else if (isProtectedUserRequest(req)) {
                 checkUserAuth(req);
             }
         } catch (Exception e) {
