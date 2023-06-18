@@ -5,6 +5,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.cloud.firestore.DocumentSnapshot;
 import lombok.AllArgsConstructor;
@@ -16,9 +17,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CurrencyRatesSnapshot {
 
+    @JsonFormat(pattern="yyyy-MM-dd")
     private LocalDate date;
 
-    @JsonProperty("conversion_rates")
     private Map<String, Double> rates;
 
     public static CurrencyRatesSnapshot ofDoc(DocumentSnapshot doc) {
@@ -28,5 +29,15 @@ public class CurrencyRatesSnapshot {
                 .stream()
                 .collect(Collectors.toMap(e -> e.getKey(), e -> (Double) e.getValue()));
         return new CurrencyRatesSnapshot(date, rates);
+    }
+
+    @JsonProperty("conversion_rates")
+    public void setRates(Map<String, Double> rates) {
+        this.rates = rates;
+    }
+
+    @JsonProperty("rates")
+    public Map<String, Double> getRates() {
+        return rates;
     }
 }
