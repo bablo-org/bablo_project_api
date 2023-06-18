@@ -7,6 +7,7 @@ import java.util.Collections;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.bablo_org.bablo_project.api.model.token.CurrencyRatesApiToken;
 import com.github.bablo_org.bablo_project.api.model.token.TelegramToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
@@ -90,6 +91,7 @@ public class BeansConfiguration {
     @Primary
     ObjectMapper jsonMapper() {
         return new ObjectMapper()
+                .registerModule(new JavaTimeModule())
                 .enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
                 .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     }
