@@ -1,14 +1,19 @@
 package com.github.bablo_org.bablo_project.api.service.impl;
 
 import static com.google.cloud.firestore.FieldPath.documentId;
+import static com.google.cloud.firestore.Filter.and;
+import static com.google.cloud.firestore.Filter.greaterThanOrEqualTo;
 import static com.google.cloud.firestore.Filter.inArray;
+import static com.google.cloud.firestore.Filter.lessThanOrEqualTo;
 import static java.util.stream.Collectors.toList;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import com.github.bablo_org.bablo_project.api.model.domain.Currency;
+import com.github.bablo_org.bablo_project.api.model.dto.CurrencyRatesSnapshot;
 import com.github.bablo_org.bablo_project.api.service.CurrencyService;
 import com.google.cloud.firestore.CollectionReference;
 import com.google.cloud.firestore.DocumentReference;
@@ -35,6 +40,24 @@ public class CurrencyServiceImpl implements CurrencyService {
                 .getDocuments()
                 .stream()
                 .map(Currency::ofDoc)
+                .collect(toList());
+    }
+
+    @Override
+    @SneakyThrows
+    public List<CurrencyRatesSnapshot> getRatesHistory(LocalDate from, LocalDate to) {
+        return firestore.collection("rates")
+                .where(
+                        and(
+                                greaterThanOrEqualTo(documentId(), from.toString()),
+                                lessThanOrEqualTo(documentId(), to.toString())
+                        )
+                )
+                .get()
+                .get()
+                .getDocuments()
+                .stream()
+                .map(CurrencyRatesSnapshot::ofDoc)
                 .collect(toList());
     }
 
