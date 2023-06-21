@@ -13,6 +13,7 @@ import com.github.bablo_org.bablo_project.api.model.domain.User;
 import com.github.bablo_org.bablo_project.api.service.NotificationService;
 import com.github.bablo_org.bablo_project.api.service.TelegramService;
 import com.github.bablo_org.bablo_project.api.service.UserService;
+import com.github.bablo_org.bablo_project.api.utils.TransactionUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -86,7 +87,7 @@ public class NotificationServiceImpl implements NotificationService {
         Map<String, User> users = userService.getAll()
                 .stream()
                 .collect(Collectors.toMap(User::getId, user -> user));
-        Map<String, List<Transaction>> byPartner = groupByPartner(transactions, currentUser);
+        Map<String, List<Transaction>> byPartner = TransactionUtils.groupByPartner(transactions, currentUser);
 
         byPartner.forEach((partnerId, txList) -> {
             User partner = users.get(partnerId);
@@ -95,12 +96,6 @@ public class NotificationServiceImpl implements NotificationService {
                 telegramService.sendMessage(message, partner.getPrivateData().getTelegramId());
             }
         });
-    }
-
-    private Map<String, List<Transaction>> groupByPartner(Collection<Transaction> transactions, String currentUser) {
-        return transactions
-                .stream()
-                .collect(Collectors.groupingBy(tx -> tx.getPartner(currentUser)));
     }
 
     private String txToMessage(String header, Collection<Transaction> transactions, Map<String, User> users) {
