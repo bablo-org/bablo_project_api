@@ -3,6 +3,7 @@ package com.github.bablo_org.bablo_project.api.controller;
 import static com.github.bablo_org.bablo_project.api.Constants.USER_TOKEN;
 
 import java.util.Base64;
+import java.util.Collections;
 import java.util.List;
 
 import com.github.bablo_org.bablo_project.api.model.domain.Settings;
@@ -46,6 +47,18 @@ public class UserController extends BaseController {
                            ? service.getUserWithPartners(userToken.getUid())
                            : service.getAll();
         return hidePrivateData(users, userToken.getUid());
+    }
+
+    @GetMapping("/{id}")
+    @ResponseBody
+    List<User> getById(@PathVariable("id") String id, @RequestAttribute(USER_TOKEN) FirebaseToken userToken) {
+        User user = service.getById(id);
+        if (user == null) {
+            return Collections.emptyList();
+        } else {
+            List<User> result = Collections.singletonList(user);
+            return hidePrivateData(result, userToken.getUid());
+        }
     }
 
     @PutMapping("/connectTelegram/{telegramUser}")
